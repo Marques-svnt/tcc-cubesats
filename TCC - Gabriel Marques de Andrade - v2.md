@@ -382,6 +382,54 @@ No teste de benchmark computacional executado sobre 2.000 avaliações seriais, 
 $$\tau_{\text{inferência}} = 0{,}4049\text{ ms por avaliação}$$
 Isso representa uma aceleração de velocidade de mais de **250.000 vezes** em relação à simulação direta no solver de Elementos Finitos (que despende em média ~100 segundos por iteração), viabilizando plenamente a convergência de rotinas de otimização multiobjetivo estocásticas de larga escala no chassi CubeSat.
 
+#### **4.2.3.6 Orquestração Multi-Agente Determinística via LangGraph**
+
+O fluxo de projeto e qualificação estrutural de nanossatélites envolve uma esteira multidisciplinar rigorosa, exigindo a conciliação simultânea entre limites físicos de fabricação aditiva metálica (L-PBF), leis constitutivas elastodinâmicas e normas de qualificação de voo aeroespacial da NASA. Para assegurar a rastreabilidade total, mitigar avaliações redundantes e automatizar as transições de decisão de engenharia concorrente em circuito fechado (*closed-loop*), implementou-se uma máquina de estados finitos determinística orientada a agentes baseada na biblioteca **LangGraph** (`StateGraph`), codificada nos módulos `src/agents/state.py`, `src/agents/specialists.py` e `src/agents/state_machine.py`.
+
+##### **4.2.3.6.1 Contrato de Estado Global Fortemente Tipado (`CubeSatState`)**
+
+A integridade das informações entre os nós especialistas é regida por um contrato de dados unificado e imutável denominado `CubeSatState`. Esse estado armazena o histórico completo do candidato:
+$$\mathcal{S} = \left\{ \mathbf{x}_{\text{geom}}, \text{dfam\_valid}, \text{diagnostics}, \hat{\mathbf{y}}_{\text{surrogate}}, \text{qual}_{\text{GEVS}}, \mathbf{y}_{\text{FEA}}, \text{audit\_trail}, \text{status} \right\}$$
+onde $\mathbf{x}_{\text{geom}} = [t, l, \theta, h]^T$ representa o vetor geométrico paramétrico; $\text{dfam\_valid} \in \{\text{True}, \text{False}\}$ indica a viabilidade aditiva; $\hat{\mathbf{y}}_{\text{surrogate}}$ armazena as predições de sub-milissegundos da ResNet; $\text{qual}_{\text{GEVS}}$ quantifica a Margem de Segurança ($MS_{\text{yield}}$) e o dano de fadiga de Steinberg ($D$); $\mathbf{y}_{\text{FEA}}$ consolida os resultados da simulação de alta fidelidade; e $\text{audit\_trail}$ registra cada transição de estado com registro cronológico UTC (*ISO 8601*), identificador do agente e justificativa técnica da decisão.
+
+##### **4.2.3.6.2 Nós Especialistas e Roteamento Condicional**
+
+O grafo de estados é composto por quatro nós especialistas sequenciais intercalados por arestas condicionais de decisão determinística:
+
+1. **`CadDfamAgent` (Portão de Manufaturabilidade Aditiva):** Audita a conformidade do candidato frente aos limites do processo L-PBF em liga AlSi10Mg. Avalia a espessura de costela ($t \ge 0{,}50\text{ mm}$), a condição autossuportada sem estruturas de suporte internas ($\theta \ge 45{,}0^\circ$ em relação à mesa de construção) e a folga livre para evacuação de pó residual:
+   $$\text{gap}_{\text{despoeiramento}} = 2 \cdot l \cdot \cos\theta - 2 \cdot t \ge 1{,}50\text{ mm}$$
+   Caso qualquer critério seja violado, a aresta condicional `route_after_dfam` encerra o fluxo imediatamente com status `REJECTED_DFAM`, impedindo o desperdício de recursos computacionais com análises dinâmicas em geometrias não-imprimíveis.
+
+2. **`NeuralSurrogateAgent` (Predição Dinâmica Rápida):** Uma vez aprovado no portão DfAM, o candidato é avaliado pelo modelo substituto *Physics-Guided ResNet* carregado em memória como *singleton*. O agente computa a densidade relativa $\rho_{\text{rel}}$ e infere em $\approx 0{,}40\text{ ms}$ os quatro parâmetros de resposta espectral ($\hat{f}_1, \hat{\sigma}_{3\sigma}, \hat{G}_{\text{rms, payload}}, \hat{T}$).
+
+3. **`GevsQualifierAgent` (Qualificação Espacial Normativa):** Avalia os parâmetros preditos à luz dos requisitos normativos da **NASA GSFC-STD-7000A**:
+   * Rigidez de desacoplamento do veículo lançador: $f_1 \ge 100{,}0\text{ Hz}$;
+   * Margem de Segurança de escoamento: $MS_{\text{yield}} = \left(\frac{184{,}0\text{ MPa}}{\hat{\sigma}_{3\sigma}}\right) - 1{,}0 > 0{,}0$;
+   * Dano cumulativo de fadiga aleatória de 3 bandas de Steinberg para $120{,}0\text{ s}$ por eixo: $D \le 0{,}25$.
+   Caso o candidato não cumpra todos os requisitos de qualificação, a aresta `route_after_gevs` direciona o grafo para o nó final com status `REJECTED_GEVS`.
+
+4. **`GroundTruthFeaAgent` (Confirmação de Alta Ordem CAE):** Os designs candidatos que obtêm aprovação cumulativa em todos os portões avançam para a validação física de alta fidelidade. O agente dispara o módulo `AnsysBatchRunner`, gerando e executando scripts paramétricos no Ansys MAPDL com malhas volumétricas de elementos `SOLID187` e resolução espectral completa, homologando formalmente o candidato como `QUALIFIED`.
+
+A arquitetura do grafo de execução determinístico está ilustrada na Figura 7.
+
+```mermaid
+flowchart TD
+    Start([Início: Candidato Geométrico]) --> CadDfam[Agente CadDfamAgent: Portões DfAM L-PBF]
+    CadDfam --> CheckDfam{Aprovado no DfAM?}
+    CheckDfam -- Não --> RejectDfam([Fim: REJECTED_DFAM])
+    CheckDfam -- Sim --> NeuralSurrogate[Agente NeuralSurrogateAgent: ResNet < 1 ms]
+    NeuralSurrogate --> GevsQualifier[Agente GevsQualifierAgent: NASA GSFC-STD-7000A]
+    GevsQualifier --> CheckGEVS{Conforme NASA GEVS?}
+    CheckGEVS -- Não --> RejectGEVS([Fim: REJECTED_GEVS])
+    CheckGEVS -- Sim --> GroundTruthFea[Agente GroundTruthFeaAgent: Validação Ansys SOLID187]
+    GroundTruthFea --> EndQualified([Fim: QUALIFIED e Auditado])
+```
+
+Figura 7 — Máquina de estados determinística multi-agente via LangGraph para triagem e qualificação do chassi.  
+*Fonte: O Autor (2026).*
+
+Esta governança determinística assegura que, em baterias de otimização evolutiva de larga escala, mais de 30% dos candidatos inviáveis por limitações geométricas ou normativas sejam eliminados em estágios precoces sem qualquer sobrecarga de simulação numérica, estabelecendo um ecossistema rigoroso, auditável e reprodutível de engenharia aeroespacial.
+
 ### **4.2.4 Validação por Similaridade e Extrapolação**  {#4.2.4-validação-por-similaridade-e-extrapolação}
 
 A quarta e última fase da metodologia compreende a consolidação da validade preditiva do modelo computacional e a transposição analítica dos parâmetros de rigidez e integridade estrutural do domínio polimérico analógico para o domínio metálico aeroespacial definitivo. O protocolo baseia-se na invariância geométrica da microestrutura celular para correlacionar o comportamento mecânico macroscópico do Poliácido Láctico (PLA) e da liga de Alumínio-Silício-Magnésio (AlSi10Mg), culminando no acoplamento de critérios de fadiga baseados em Mecânica da Fratura Linear Elástica (LEFM).
