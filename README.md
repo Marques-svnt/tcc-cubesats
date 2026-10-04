@@ -93,13 +93,13 @@ python -m pytest tests/ -v
 
 ---
 
-## 📅 Cronograma de Sprints (10/2026 - 05/2027)
+## 📅 Cronograma de Sprints Revisado (10/2026 - 05/2027)
 
-* **Sprint 1 (Out/26):** Estudo Dirigido, Levantamento Normativo e Marco Teórico.
-* **Sprint 2 (Nov/26):** Parametrização CAD/DfAM e Caracterização Mecânica do PLA (FDM).
-* **Sprint 3 (Dez/26):** Homogeneização Numérica Multiescala (RVE) e Calibração Constitutiva.
-* **Sprint 4 (Jan/27):** Pipeline CAE Automatizado (Ansys MAPDL) — Modal e Vibração Randômica.
-* **Sprint 5 (Fev/27):** Design of Experiments (LHS), Otimização FGL e Fadiga de Steinberg.
-* **Sprint 6 (Mar/27):** Extrapolação Metálica (AlSi10Mg), Tolerância ao Dano e Validação de Bancada.
-* **Sprint 7 (Abr/27):** Redação Completa da Monografia do TCC e Revisão Crítica com a Orientadora.
-* **Sprint 8 (Mai/27):** Revisão ABNT/UESC, Produção de Slides Técnicos e Defesa Perante a Banca.
+* **Sprint 1 (Out/26):** Engenharia de Sistemas, Espaço de Projeto DfAM & Pipeline DoE Paramétrico (LHS).
+* **Sprint 2 (Nov/26):** Automação FEA de Alta Fidelidade (Ansys MAPDL) & Geração do Dataset Base.
+* **Sprint 3 (Dez/26):** Desenvolvimento do Modelo Substituto Neural Guiado por Física (Physics-Guided ResNet em PyTorch).
+* **Sprint 4 (Jan/27):** Arquitetura Multi-Agente com LangGraph & Orquestração de Engenharia Concorrente.
+* **Sprint 5 (Fev/27):** Otimização Multiobjetivo (NSGA-II) & Síntese da Frente de Pareto do Chassi 1U.
+* **Sprint 6 (Mar/27):** Auditoria em Alta Fidelidade no Ansys, Análise de Fadiga de Steinberg & Benchmark Estrutural.
+* **Sprint 7 (Abr/27):** Redação Integral da Monografia do TCC e Revisão Crítica com a Orientadora.
+* **Sprint 8 (Mai/27):** Fechamento Textual ABNT/UESC, Slides Técnicos, Ensaio Pré-Banca e Defesa Oficial.
