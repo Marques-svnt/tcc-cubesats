@@ -281,28 +281,47 @@ Onde [![][image47]](https://www.codecogs.com/eqnedit.php?latex=C_%7Bijpq%7D#2) r
 
 ### **4.2.3 Simulação Dinâmica Computacional (CAE)** {#4.2.3-simulação-dinâmica-computacional-(cae)}
 
-A terceira fase da metodologia consiste na modelagem e execução dos ensaios virtuais em ambiente computacional de alta fidelidade (CAE), utilizando o *software* Ansys Mechanical. O objetivo central desta etapa é submeter o chassi contínuo equivalente de densidade graduada (*Functionally Graded Lattice* — FGL) aos envelopes de carregamento mecânico transientes e estocásticos regulados para o setor aeroespacial. O fluxo analítico compreende a parametrização de discretização de malha, a análise estrutural transiente de ejeção, a análise modal pré-tensionada e a simulação de vibração aleatória baseada na densidade espetral de potência.
+A terceira fase da metodologia consiste na modelagem e execução dos ensaios computacionais de alta fidelidade (CAE) em lote, utilizando o módulo Ansys MAPDL (*Mechanical APDL*) automatizado via scripts paramétricos em linguagem APDL e acoplamento com PyAnsys (`src/analysis/ansys_batch_runner.py`). O objetivo central desta etapa é submeter as configurações geométricas geradas pelo pipeline DoE aos envelopes de carregamento mecânico transientes e estocásticos regulados para o setor aeroespacial, gerando a base de dados elastodinâmica para o treinamento da rede neural substituta.
 
-A precisão dos campos de tensão e deformação gerados nas simulações depende estritamente do esquema de discretização espacial. Devido à complexidade geométrica das transições de densidade celular e dos nós de interface com os trilhos monolíticos, a malha volumétrica será estruturada empregando elementos sólidos de alta ordem. Utilizar-se-ão elementos tetraédricos quadráticos de 10 nós (SOLID187), dotados de formulação de deslocamento quadrático, os quais superam o travamento por cisalhamento (*shear locking*) e garantem convergência rigorosa em regiões de elevados gradientes de tensão (POZORSKI; ANDRZEJEWSKI, 2025).
+#### **4.2.3.1 Discretização Espacial e Formulação dos Elementos Finitos (SOLID187)**
 
-O critério para definição do tamanho global dos elementos será governado por um Estudo de Independência de Malha. O refinamento progressivo será interrompido quando a variação percentual (*threshold* de convergência) nas três primeiras frequências naturais consecutivas e no pico de tensão equivalente de Von Mises for inferior a 1,0%.
+A precisão dos campos de tensão e deformação nas regiões celulares depende estritamente do esquema de discretização espacial. Devido à presença de paredes delgadas, reentrâncias angulares agudas e junções com os quatro trilhos longitudinais monolíticos ($8{,}5 \times 8{,}5\text{ mm}$), a malha volumétrica é estruturada empregando elementos sólidos tetraédricos quadráticos de 10 nós (`SOLID187`). Cada nó possui três graus de liberdade translacionais ($u_x, u_y, u_z$). A formulação quadrática de deslocamento elimina o travamento por cisalhamento (*shear locking*), acomoda com alta precisão curvaturas complexas e assegura convergência assintótica em zonas de elevados gradientes de tensão (POZORSKI; ANDRZEJEWSKI, 2025).
 
-A primeira etapa de carregamento consistirá na Análise Estrutural Transiente (Choque de Ejeção). O modelo numérico tem como objetivo simular as condições de contorno físicas do *Poly-Picosatellite Orbital Deployer* (P-POD), mapeadas a partir das especificações originais de projeto estabelecidas por Puig-Suari *et al.* (2002). O contato entre os trilhos monolíticos do chassi e as guias internas do contêiner será modelado como uma interface deslizante não-linear com fricção mecânica (*Frictional Contact*), adotando um coeficiente de atrito cinético de Coulomb [![][image50]](https://www.codecogs.com/eqnedit.php?latex=%5Cmu%20%3D%200%2C15#2) para alumínio anodizado sob vácuo. A força de mola impulsiva será introduzida como uma condição de contorno de força dependente do tempo atuante na placa empurradora inferior, cuja cinemática de translação é parametrizada pela integração numérica da equação de movimento, segundo a Equação (12) (LIMA; MANEA; SANTOS, 2021):
+O modelo constitutivo adota a liga de alumínio aeroespacial AlSi10Mg aliviada de tensões ($300^\circ\text{C} / 2\text{h}$), com módulo de elasticidade $E = 68{,}0\text{ GPa}$, coeficiente de Poisson $\nu = 0{,}33$, densidade $\rho = 2680{,}0\text{ kg/m}^3$ e limite de escoamento $\sigma_{\text{yield}} = 230{,}0\text{ MPa}$. A tensão admissível de projeto sob os fatores de segurança da NASA ($FS_{\text{yield}} = 1{,}25$) é estabelecida em $\sigma_{\text{adm}} = 184{,}0\text{ MPa}$.
 
- (12)  
-Onde M é a massa combinada de 1,33 kg, [![][image51]](https://www.codecogs.com/eqnedit.php?latex=P_0#2) é a pré-carga nominal da mola e c é a rigidez linear do mecanismo de ejeção.
+#### **4.2.3.2 Análise Modal Pré-Tensionada via Algoritmo de Block Lanczos**
 
-A segunda etapa compreenderá a Análise Modal Pré-Tensionada. Esta simulação visa extrair as frequências naturais ([![][image52]](https://www.codecogs.com/eqnedit.php?latex=f_n#2)) e os autovetores correspondentes aos modos estruturais fundamentais de vibração. A inclusão do pré-tensionamento é indispensável para computar a alteração da matriz de rigidez geométrica ([![][image53]](https://www.codecogs.com/eqnedit.php?latex=%5BK_g%5D#2)) induzida pelas cargas de fixação interna dos subsistemas e interfaces mecânicas. O chassi será restrito rigidamente nos planos de suporte dos trilhos, simulando as restrições de porta fechada do P-POD (PUIG-SUARI *et al.*, 2002). A meta de projeto fixa que o primeiro modo de vibrar deve cumprir a restrição limite de [![][image54]](https://www.codecogs.com/eqnedit.php?latex=f_1%20%5Cge%20100%20%5Ctext%7B%20Hz%7D#2) para mitigar o acoplamento com o veículo lançador e evitar fenômenos de ressonância mecânica destrutiva (NASA, 2013).
+A primeira etapa do solver dinâmico compreende a extração das frequências naturais fundamentais ($f_n$) e dos autovetores modais $\{\phi_i\}$ através da equação característica de autovalor:
+$$\left( [K] - \omega_i^2 [M] \right) \{\phi_i\} = \{0\}$$
+onde $[K]$ representa a matriz de rigidez global (incluindo o endurecimento geométrico das pré-cargas de montagem interna dos subsistemas), $[M]$ é a matriz de massa consistente e $\omega_i = 2\pi f_i$ denota a frequência circular do $i$-ésimo modo.
 
-A terceira etapa focar-se-á na Análise de Vibração Aleatória (*Random Vibration*), representando o carregamento estocástico transmitido via excitação de base durante a fase de inserção orbital. O chassi será submetido a um perfil espectral de aceleração em banda larga na faixa de frequências de 20 Hz a 2000 Hz. O espectro de entrada adotará estritamente os níveis de qualificação geral para componentes de voo estipulados na norma NASA GEVS (GSFC-STD-7000A), totalizando uma magnitude de aceleração global de [![][image55]](https://www.codecogs.com/eqnedit.php?latex=14%2C1%20%5C%20G_%7B%5Ctext%7Brms%7D%7D#2) (NASA, 2013). A distribuição detalhada da Densidade Espectral de Potência (PSD) é especificada na Tabela 2\. 
+A extração dos 10 primeiros modos estruturais de vibrar é realizada pelo algoritmo numérico de **Block Lanczos**, reconhecido pela robustez e rápida convergência em sistemas estruturais simétricos de grandes dimensões. As condições de contorno simulam o confinamento rígido do CubeSat no interior do dispensador P-POD (PUIG-SUARI *et al.*, 2002), impondo restrições de deslocamento nulo nas faces de contato dos quatro trilhos maciços. Para desacoplar a dinâmica do nanossatélite dos modos transientes de baixa frequência do veículo lançador, exige-se o cumprimento estrito do critério de qualificação da NASA:
+$$f_1 \ge 100{,}0\text{ Hz}$$
 
-Tabela 2 \- Níveis do espectro de vibração aleatória para qualificação estrutural
+#### **4.2.3.3 Análise de Vibração Aleatória Espectral (PSD) sob Norma NASA GEVS**
 
-![][image56]
+A resposta estrutural estocástica durante a fase de propulsão e ascensão atmosférica do foguete é avaliada por meio de uma análise espectral de vibração aleatória (*Random Vibration PSD*). A excitação de base aplica o espectro de aceleração normalizado pela **NASA GSFC-STD-7000A (GEVS)** para cargas úteis e componentes secundários, com magnitude global de aceleração eficaz de:
+$$G_{\text{rms, base}} = 14{,}1\text{ G}_{\text{rms}}$$
+na faixa de frequências de 20 Hz a 2000 Hz, com amortecimento estrutural crítico $\zeta = 2{,}0\%$ ($Q = 25$) ou valor conservador de banda larga $\zeta = 5{,}0\%$ ($Q = 10$).
 
-Fonte: Adaptada de NASA GEVS
+A Densidade Espectral de Potência (PSD) de entrada é descrita pelo perfil:
+* $20\text{ Hz}$: $0{,}013\text{ g}^2/\text{Hz}$ (rampa inicial de subida de $+3\text{ dB/oitava}$);
+* $50 - 800\text{ Hz}$: $0{,}080\text{ g}^2/\text{Hz}$ (patamar de densidade máxima de energia);
+* $2000\text{ Hz}$: $0{,}0053\text{ g}^2/\text{Hz}$ (atenuação de alta frequência de $-6\text{ dB/oitava}$).
 
-A simulação de vibração aleatória adotará uma razão de amortecimento estrutural constante [![][image57]](https://www.codecogs.com/eqnedit.php?latex=%5Czeta%20%3D%200%2C02#2) (2% de amortecimento crítico), valor de referência para estruturas aeroespaciais metálicas montadas (NASA, 2013). A resposta dinâmica da estrutura celular de densidade graduada será avaliada por meio de curvas de Transmissibilidade de Aceleração e pelo cálculo estatístico das tensões pelo método de 3-sigma ([![][image58]](https://www.codecogs.com/eqnedit.php?latex=3%5Csigma#2)) de Von Mises. Os resultados numéricos gerados mapearão a eficiência do núcleo auxético em criar zonas de atenuação de ondas elásticas (*bandgaps*), protegendo o volume interno útil contra asseverações dinâmicas sem violar os limites de escoamento do material.
+A resposta espectral na interface de fixação da carga útil centralizada (*payload mount point*) é integrada numericamente pelo método modal espectral, permitindo extrair a aceleração eficaz $G_{\text{rms, payload}}$ e a razão de transmissibilidade dinâmica:
+$$T = \frac{G_{\text{rms, payload}}}{G_{\text{rms, base}}} = \frac{G_{\text{rms, payload}}}{14{,}1}$$
+
+A tensão de pico estocástica de projeto é calculada sob a distribuição Gaussiana a $3\sigma$ (probabilidade de não-excedência de 99,73%), governando a Margem de Segurança de escoamento:
+$$MS_{\text{yield}} = \left( \frac{\sigma_{\text{adm}}}{\sigma_{3\sigma}} \right) - 1{,}0 = \left( \frac{184{,}0\text{ MPa}}{\sigma_{3\sigma}} \right) - 1{,}0 > 0{,}0$$
+
+#### **4.2.3.4 Acúmulo de Dano de Fadiga Vibracional (Método de 3 Bandas de Steinberg)**
+
+Para verificar a integridade estrutural ao longo dos $120{,}0\text{ segundos}$ de duração do teste de qualificação por eixo, o acúmulo de dano por fadiga estocástica é quantificado pela regra linear de Palmgren-Miner combinada à distribuição de três bandas de Steinberg (NASA-HDBK-7005):
+$$D = \sum_{i=1}^3 \frac{n_i}{N_i} = \frac{n_{1\sigma}}{N_{1\sigma}} + \frac{n_{2\sigma}}{N_{2\sigma}} + \frac{n_{3\sigma}}{N_{3\sigma}}$$
+onde as contagens de ciclos aplicados e os limites de fadiga cíclica são regidos pela equação de Basquin $N_i = C \cdot (\sigma_i)^{-m}$, adotando expoente $m = 6{,}8$ e coeficiente $C = 1{,}2 \times 10^{20}$ para a liga AlSi10Mg. A qualificação espacial exige:
+$$D \le 0{,}25$$
+garantindo fator de segurança de vida de $4\times$ contra falhas estruturais catastróficas em voo.
 
 ### **4.2.4 Validação por Similaridade e Extrapolação**  {#4.2.4-validação-por-similaridade-e-extrapolação}
 
