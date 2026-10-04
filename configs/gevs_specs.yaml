@@ -1,0 +1,31 @@
+# NASA GEVS (GSFC-STD-7000A) Random Vibration Qualification Profile
+# Qualification levels for hardware < 22.7 kg (50 lb)
+
+general:
+  standard: "NASA GSFC-STD-7000A"
+  qualification_level: "General Environmental Verification Standard"
+  duration_per_axis_seconds: 120.0
+  damping_ratio: 0.02  # 2% critical structural damping (zeta)
+  axes: ["X", "Y", "Z"]
+
+random_vibration_psd:
+  overall_acceleration_grms: 14.1
+  frequency_profile_hz:
+    - freq: 20.0
+      psd: 0.013    # g^2/Hz (+3 dB/octave ramp up)
+    - freq: 50.0
+      psd: 0.080    # plateau start
+    - freq: 800.0
+      psd: 0.080    # plateau end
+    - freq: 2000.0
+      psd: 0.0053   # -6 dB/octave ramp down
+
+stiffness_requirements:
+  minimum_fundamental_frequency_hz: 100.0  # Decouple from launch vehicle modes
+
+interface_p_pod:
+  rail_length_mm: 113.5
+  rail_cross_section_mm: 8.5
+  rail_tolerance_mm: 0.1
+  max_total_mass_kg: 1.33
+  max_structural_mass_kg: 0.35  # Allocated primary bus mass

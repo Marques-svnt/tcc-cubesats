@@ -1,0 +1,86 @@
+# ==============================================================================
+# .gitignore — CubeSat 1U Auxetic Lattice Structural Optimization (UESC)
+# ==============================================================================
+
+# --- Python & Ambientes Virtuais ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- Testes, Cobertura e Linter ---
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.ruff_cache/
+.mypy_cache/
+
+# --- Arquivos Temporários de Sistema Operacional e IDEs ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- CAD (SolidWorks, Parasolid, STEP temporários) ---
+~$*
+*.tmp
+*.bak
+*.sldprt~
+*.sldasm~
+*.slddrw~
+
+# --- CAE & Solvers de Elementos Finitos (Ansys MAPDL / Mechanical) ---
+*.lock
+*.rst
+*.rth
+*.mode
+*.full
+*.emat
+*.esav
+*.mntr
+*.page
+*.err
+*.log
+*.dsp
+*.tri
+*.sub
+file.*
+*.ansys_temp*
+
+# --- Arquivos Pesados e Backups Brutos (> 100MB / Limites de Git) ---
+*.zip
+*.tar.gz
+*.7z
+Referencial-*.zip
+
+# --- Saídas Temporárias e Scratch de Agentes ---
+scratch/
+temp/
+logs/*.log

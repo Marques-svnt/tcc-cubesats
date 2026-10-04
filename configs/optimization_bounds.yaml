@@ -1,0 +1,39 @@
+# Design space and optimization bounds for 3D re-entrant auxetic lattice panel
+
+variables:
+  reentrant_angle_theta_deg:
+    min: 55.0
+    max: 80.0
+    nominal: 68.0
+    unit: "degrees"
+    description: "Re-entrant inclined strut angle"
+
+  strut_thickness_t_mm:
+    min: 0.50
+    max: 1.80
+    nominal: 0.80
+    unit: "mm"
+    description: "Strut wall thickness (L-PBF feature limit >= 0.4 mm)"
+
+  strut_length_l_mm:
+    min: 4.0
+    max: 10.0
+    nominal: 6.0
+    unit: "mm"
+    description: "Length of the inclined re-entrant strut"
+
+  strut_height_h_mm:
+    min: 6.0
+    max: 15.0
+    nominal: 9.0
+    unit: "mm"
+    description: "Height of the vertical connecting strut"
+
+relative_density_bounds:
+  min: 0.10
+  max: 0.38
+
+dfam_constraints:
+  min_overhang_angle_deg: 45.0      # Self-supporting angle without powder support
+  min_powder_clearance_mm: 1.5      # Minimum gap for depowdering
+  rail_monolithic_width_mm: 8.5     # Preserved continuous rail width

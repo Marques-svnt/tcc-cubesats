@@ -1,0 +1,32 @@
+# Auto-detect text files and normalize line endings to LF on commit
+* text=auto eol=lf
+
+# Explicit text files
+*.py text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.tex text eol=lf
+*.bib text eol=lf
+*.sh text eol=lf
+
+# Windows-specific files
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary files (CAD, CAE, Documentos compilados e imagens)
+*.step binary
+*.stp binary
+*.iges binary
+*.igs binary
+*.stl binary
+*.sldprt binary
+*.sldasm binary
+*.x_t binary
+*.x_b binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.zip binary

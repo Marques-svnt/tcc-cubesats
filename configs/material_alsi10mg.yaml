@@ -1,0 +1,29 @@
+# Material properties for additively manufactured AlSi10Mg (L-PBF)
+# Heat treatment: Stress-relieved / T6 heat treated
+# References: MMPDS-14, Roberts (2018), Zhong et al. (2023)
+
+material:
+  name: "AlSi10Mg"
+  process: "Laser Powder Bed Fusion (L-PBF)"
+  condition: "Stress Relieved (300C / 2h)"
+  density_kg_m3: 2680.0             # rho_s
+  young_modulus_gpa: 68.0           # E_s
+  poisson_ratio: 0.33               # nu_s
+  shear_modulus_gpa: 25.5           # G_s
+
+strength_limits:
+  yield_strength_mpa: 230.0         # sigma_y (0.2% offset)
+  ultimate_tensile_strength_mpa: 340.0 # sigma_uts
+  elongation_percent: 5.5
+
+safety_factors:
+  yield_factor: 1.25                # NASA standard FS_yield
+  ultimate_factor: 1.40             # NASA standard FS_ultimate
+  allowable_stress_yield_mpa: 184.0 # sigma_yield / 1.25
+
+fatigue_properties:
+  fatigue_limit_runout_cycles: 1.0e7
+  fatigue_strength_limit_mpa: 75.0  # At 10^7 cycles, R = -1
+  basquin_exponent_m: 6.8           # S-N curve slope N = C * (sigma)^(-m)
+  basquin_constant_c: 1.2e20
+  steinberg_cumulative_damage_limit: 0.25 # NASA-HDBK-7005 (FoS = 2.0 on life)
