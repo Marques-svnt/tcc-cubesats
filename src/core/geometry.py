@@ -108,10 +108,12 @@ def validate_dfam_constraints(
     height_h: float,
     min_thickness_mm: float = 0.50,
     min_overhang_angle_deg: float = 45.0,
+    min_powder_clearance_mm: float = 1.50,
 ) -> Tuple[bool, Dict[str, str]]:
     """Validates Design for Additive Manufacturing (DfAM) constraints for L-PBF printing.
 
-    Checks self-supporting overhangs, minimum wall thickness, and geometry validity.
+    Checks self-supporting overhangs, minimum wall thickness, powder evacuation
+    clearance, and geometric validity.
 
     Args:
         theta_deg: Re-entrant angle in degrees.
@@ -120,6 +122,7 @@ def validate_dfam_constraints(
         height_h: Strut height in mm.
         min_thickness_mm: Minimum printable feature size for AlSi10Mg L-PBF.
         min_overhang_angle_deg: Minimum self-supporting angle relative to build plate.
+        min_powder_clearance_mm: Minimum gap between struts to allow powder evacuation.
 
     Returns:
         Tuple (is_valid, validation_messages_dict).
@@ -145,5 +148,15 @@ def validate_dfam_constraints(
     if height_h <= thickness_t or length_l <= thickness_t:
         is_valid = False
         messages["aspect_ratio"] = "Strut length or height is smaller than strut thickness."
+
+    # Depowdering clearance between re-entrant struts: gap = 2 * l * cos(theta) - 2 * t
+    theta_rad = math.radians(theta_deg)
+    powder_clearance_gap = 2.0 * length_l * math.cos(theta_rad) - 2.0 * thickness_t
+    if powder_clearance_gap < min_powder_clearance_mm:
+        is_valid = False
+        messages["powder_clearance"] = (
+            f"Powder clearance gap {powder_clearance_gap:.2f} mm is below depowdering threshold "
+            f"({min_powder_clearance_mm:.2f} mm). Residual metal powder entrapment risk."
+        )
 
     return is_valid, messages

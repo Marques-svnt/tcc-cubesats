@@ -60,3 +60,18 @@ def test_validate_dfam_constraints_pass_and_fail() -> None:
     )
     assert is_invalid is False
     assert "thickness" in msgs_fail
+
+
+def test_validate_dfam_powder_clearance() -> None:
+    """Verifies that narrow strut spacing triggers the powder clearance DfAM violation."""
+    # When theta is large (80 deg) and length is short (4.0 mm), struts leave insufficient gap for depowdering
+    is_valid, msgs = validate_dfam_constraints(
+        theta_deg=80.0,
+        thickness_t=1.2,
+        length_l=4.0,
+        height_h=8.0,
+        min_powder_clearance_mm=1.5,
+    )
+    assert is_valid is False
+    assert "powder_clearance" in msgs
+
