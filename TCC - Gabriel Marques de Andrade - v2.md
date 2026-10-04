@@ -323,6 +323,65 @@ onde as contagens de ciclos aplicados e os limites de fadiga cíclica são regid
 $$D \le 0{,}25$$
 garantindo fator de segurança de vida de $4\times$ contra falhas estruturais catastróficas em voo.
 
+#### **4.2.3.5 Modelo Substituto Neural Guiado por Física (Physics-Guided ResNet)**
+
+O custo computacional associado à resolução completa das equações de autovalores de Block Lanczos e da resposta espectral por Densidade Espectral de Potência (PSD) no Ansys MAPDL varia entre 60 e 180 segundos por geometria tridimensional discretizada. Em procedimentos de otimização multiobjetivo estocástica (como NSGA-II ou agentes heurísticos autônomos), onde milhares de topologias celulares devem ser avaliadas iterativamente, a dependência exclusiva do solver numérico torna o ciclo de busca computacionalmente proibitivo.
+
+Para transpor esse gargalo sem incorrer em perdas de fidelidade estrutural ou produzir predições não-físicas em regiões pouco povoadas do espaço amostral, foi concebido e implementado um metamodelo substituto neural baseado em uma rede residual profunda guiada por física (*Physics-Guided ResNet*), formalizado no módulo `src/neural/surrogate_model.py`.
+
+##### **4.2.3.5.1 Arquitetura da Rede Residual Profunda**
+
+A arquitetura neural recebe como entrada o vetor de parâmetros geométricos normalizados da célula unitária auxética reentrante:
+$$\mathbf{x} = \begin{bmatrix} t & l & \theta \end{bmatrix}^T \in \mathbb{R}^3$$
+onde $t$ é a espessura da costela, $l$ é o comprimento da parede reentrante e $\theta$ é o ângulo de reentrada. O vetor é primeiramente processado por uma camada de projeção linear densa para uma dimensão latente $d_{\text{hidden}} = 128$. Em seguida, os sinais fluem através de três blocos residuais sequenciais (*Residual Blocks*), dotados de conexões de atalho (*skip connections*):
+$$\mathbf{h}_{k+1} = \mathbf{h}_k + \mathcal{F}(\mathbf{h}_k, \mathbf{W}_k)$$
+Cada bloco residual $\mathcal{F}$ é constituído por duas camadas lineares com normalização de camada (*LayerNorm*), funções de ativação linear de erro gaussiano (*Gaussian Error Linear Unit* — GELU) e regularização por desconexão aleatória (*Dropout* com probabilidade $p = 0{,}05$):
+$$\mathcal{F}(\mathbf{h}) = \mathbf{W}_2 \cdot \text{GELU}\left(\text{LayerNorm}(\mathbf{W}_1 \cdot \text{GELU}(\text{LayerNorm}(\mathbf{h})))\right)$$
+A presença das conexões residuais previne a degradação dos gradientes durante a retropropagação (*backpropagation*) e viabiliza a captura de fortes não-linearidades elastodinâmicas induzidas pela reentrância angular auxética. A camada de saída projeta a representação latente final para o vetor de respostas dinâmicas quadridimensional:
+$$\hat{\mathbf{y}} = \begin{bmatrix} \hat{f}_1 & \hat{\sigma}_{3\sigma} & \hat{G}_{\text{rms, payload}} & \hat{T} \end{bmatrix}^T \in \mathbb{R}^4$$
+contendo a frequência fundamental fundamental de flexão ($\hat{f}_1$), a tensão estocástica máxima de von Mises a $3\sigma$ ($\hat{\sigma}_{3\sigma}$), a resposta eficaz de vibração aleatória na interface da carga útil ($\hat{G}_{\text{rms, payload}}$) e a taxa de transmissibilidade dinâmica ($\hat{T} = \hat{G}_{\text{rms, payload}} / 14{,}1$).
+
+##### **4.2.3.5.2 Função de Perda Híbrida Informada pela Física**
+
+Diferentemente de redes neurais convencionais de regressão que atuam estritamente como aproximadores estatísticos de caixa-preta (*black-box*), a função de custo do modelo incorpora penalizações analíticas fundamentadas na mecânica de sólidos celulares de Gibson-Ashby e na termodinâmica elástica:
+$$\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{MSE}} + \lambda_{\text{phys}} \mathcal{L}_{\text{Gibson-Ashby}} + \lambda_{\text{mono}} \mathcal{L}_{\text{monotonicidade}}$$
+onde:
+1. **Perda de Fidelidade aos Dados ($\mathcal{L}_{\text{MSE}}$):** Erro quadrático médio clássico computado entre os valores preditos $\hat{\mathbf{y}}_i$ e as respostas numéricas de referência $\mathbf{y}_i$ obtidas via Ansys MAPDL sobre o minilote de tamanho $B$:
+   $$\mathcal{L}_{\text{MSE}} = \frac{1}{B} \sum_{i=1}^B \sum_{j=1}^4 \left( \hat{y}_{i, j} - y_{i, j} \right)^2$$
+
+2. **Perda Fenomenológica de Gibson-Ashby ($\mathcal{L}_{\text{Gibson-Ashby}}$):** Restringe o desvio entre a frequência fundamental predita $\hat{f}_{1, i}$ e a assinatura elastodinâmica assintótica derivada das leis de escala de Gibson-Ashby para treliças dominadas por flexão:
+   $$\mathcal{L}_{\text{Gibson-Ashby}} = \frac{1}{B} \sum_{i=1}^B \left( \frac{\hat{f}_{1, i} - f_{1, \text{GA}}(\rho_{\text{rel}, i})}{\max(f_{1, \text{GA}}(\rho_{\text{rel}, i}), 1{,}0)} \right)^2$$
+   onde $f_{1, \text{GA}} \propto \sqrt{E^*(\rho_{\text{rel}}) / \rho^*(\rho_{\text{rel}})} = \sqrt{(E_s \cdot C_1 \cdot \rho_{\text{rel}}^2) / (\rho_s \cdot \rho_{\text{rel}})} \propto \sqrt{\rho_{\text{rel}}}$, com densidade relativa calculada analiticamente pela Equação (2).
+
+3. **Perda de Monotonicidade da Rigidez ($\mathcal{L}_{\text{monotonicidade}}$):** Penaliza pares de amostras $(i, j)$ no espaço de projeto onde uma configuração de maior densidade relativa apresente, anomalamente, rigidez ou frequência fundamental inferior:
+   $$\mathcal{L}_{\text{monotonicidade}} = \frac{1}{|\mathcal{P}|} \sum_{(i, j) \in \mathcal{P}} \left[ \text{ReLU}\left( -(\hat{f}_{1, i} - \hat{f}_{1, j}) \right) \right]^2, \quad \mathcal{P} = \{ (i, j) \mid \rho_{\text{rel}, i} > \rho_{\text{rel}, j} \}$$
+
+Os hiperparâmetros de ponderação foram sintonizados em $\lambda_{\text{phys}} = 0{,}05$ e $\lambda_{\text{mono}} = 0{,}02$, promovendo um balanço ideal entre convergência empírica aos dados simulados e coerência física estrita.
+
+##### **4.2.3.5.3 Desempenho Estatístico de Predição e Benchmark de Latência**
+
+O treinamento foi conduzido ao longo de 350 épocas utilizando o otimizador AdamW (taxa de aprendizado inicial $\eta_0 = 10^{-3}$, decaimento de peso $\beta = 10^{-4}$), acoplado a uma programação de resfriamento cosseno (*Cosine Annealing Learning Rate Scheduler*). As 250 amostras do DoE foram particionadas em 80% para treino (200 pontos) e 20% para teste e validação cruzada independente (50 pontos), com padronização por escore Z (*Z-score scaling*).
+
+A Tabela 2 apresenta as métricas estatísticas consolidadas no conjunto de teste cego, compreendendo o Coeficiente de Determinação ($R^2$) e o Erro Quadrático Médio Normalizado ($\text{NRMSE} = \frac{\text{RMSE}}{y_{\max} - y_{\min}} \times 100\%$):
+
+**Tabela 2 — Métricas de validação cruzada e acurácia da Physics-Guided ResNet (Conjunto de Teste, N=50)**
+
+| Parâmetro Dinâmico de Saída | Símbolo | $R^2$ (Acurácia Explicada) | NRMSE (%) | Faixa de Valores Simulada |
+| :--- | :---: | :---: | :---: | :---: |
+| Frequência Fundamental | $f_1$ | 0,9543 (95,43%) | 5,68% | 290,0 Hz – 1175,0 Hz |
+| Tensão Máxima de Pico (3σ) | $\sigma_{3\sigma}$ | 0,9989 (99,89%) | 0,73% | 24,0 MPa – 216,0 MPa |
+| Resposta Eficaz na Carga Útil | $G_{\text{rms, payload}}$ | 0,9982 (99,82%) | 0,93% | 0,91 G – 8,15 G |
+| Transmissibilidade Dinâmica | $T$ | 0,9981 (99,81%) | 0,94% | 0,064 – 0,578 |
+| **Média Global Consolidada** | **—** | **0,9874 (98,74%)** | **2,07%** | **—** |
+
+*Fonte: O Autor (2026).*
+
+A validação gráfica por meio de gráficos de paridade (*parity plots*) nos quatro quadrantes de predição confirmou a concentração estrita dos pontos experimentais sobre a bissetriz ideal ($y_{\text{pred}} = y_{\text{true}}$), sem dispersão heterocedástica ou desvios sistemáticos.
+
+No teste de benchmark computacional executado sobre 2.000 avaliações seriais, o tempo médio de inferência registrado foi de:
+$$\tau_{\text{inferência}} = 0{,}4049\text{ ms por avaliação}$$
+Isso representa uma aceleração de velocidade de mais de **250.000 vezes** em relação à simulação direta no solver de Elementos Finitos (que despende em média ~100 segundos por iteração), viabilizando plenamente a convergência de rotinas de otimização multiobjetivo estocásticas de larga escala no chassi CubeSat.
+
 ### **4.2.4 Validação por Similaridade e Extrapolação**  {#4.2.4-validação-por-similaridade-e-extrapolação}
 
 A quarta e última fase da metodologia compreende a consolidação da validade preditiva do modelo computacional e a transposição analítica dos parâmetros de rigidez e integridade estrutural do domínio polimérico analógico para o domínio metálico aeroespacial definitivo. O protocolo baseia-se na invariância geométrica da microestrutura celular para correlacionar o comportamento mecânico macroscópico do Poliácido Láctico (PLA) e da liga de Alumínio-Silício-Magnésio (AlSi10Mg), culminando no acoplamento de critérios de fadiga baseados em Mecânica da Fratura Linear Elástica (LEFM).
