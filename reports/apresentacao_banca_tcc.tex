@@ -1,0 +1,663 @@
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[brazilian]{babel}
+\usepackage[papersize={25.4cm,14.29cm},left=1.2cm,right=1.2cm,top=1.0cm,bottom=1.0cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{tabularx}
+\usepackage{hyperref}
+\usepackage{setspace}
+
+\pagestyle{empty}
+
+% Aerospace Color Palette
+\definecolor{SpaceNavy}{RGB}{11, 27, 61}
+\definecolor{NavyAccent}{RGB}{27, 54, 93}
+\definecolor{SpaceGold}{RGB}{229, 169, 60}
+\definecolor{TextDark}{RGB}{30, 41, 59}
+\definecolor{CardBg}{RGB}{245, 247, 250}
+\definecolor{CardBorder}{RGB}{218, 224, 233}
+\definecolor{ApprovedGreen}{RGB}{39, 174, 96}
+
+\newcommand{\slideheader}[3]{
+    \noindent
+    \begin{minipage}{\textwidth}
+        \colorbox{SpaceNavy}{
+            \parbox{\dimexpr\textwidth-2\fboxsep\relax}{
+                \vspace{0.2cm}
+                \hspace{0.3cm}
+                \begin{minipage}{0.85\textwidth}
+                    {\Large \textbf{\textcolor{white}{#1}}}\\[0.1cm]
+                    \ifx&#2&\else{\small \textbf{\textcolor{SpaceGold}{#2}}}\fi
+                \end{minipage}
+                \hfill
+                \begin{minipage}{0.10\textwidth}
+                    \raggedleft
+                    {\large \textbf{\textcolor{white}{#3 / 20}}}\hspace{0.3cm}
+                \end{minipage}
+                \vspace{0.2cm}
+            }
+        }
+    \end{minipage}
+    \vspace{0.4cm}
+}
+
+\newcommand{\slidefooter}{
+    \vfill
+    \noindent
+    \begin{minipage}{\textwidth}
+        \centering
+        \scriptsize \textcolor{gray}{UESC -- Engenharia Mecânica | TCC Gabriel Marques de Andrade | Orientadora: Prof.ª Dr.ª Nila C. F. L. Medeiros}
+    \end{minipage}
+}
+
+\begin{document}
+
+% =============================================================================
+% SLIDE 1: Capa
+% =============================================================================
+\noindent
+\colorbox{SpaceNavy}{
+    \parbox[c][12.2cm][c]{\dimexpr\textwidth-2\fboxsep\relax}{
+        \centering
+        \vspace{0.8cm}
+        {\large \textbf{\textcolor{SpaceGold}{UNIVERSIDADE ESTADUAL DE SANTA CRUZ (UESC)}}}\\[0.2cm]
+        {\small \textbf{\textcolor{white}{COLEGIADO DO CURSO DE ENGENHARIA MECÂNICA}}}\\[1.0cm]
+
+        {\LARGE \textbf{\textcolor{white}{CubeSat em Baixa Órbita: Otimização de Volume e Geometria}}}\\[0.3cm]
+        {\Large \textbf{\textcolor{white}{para Maximização de Desempenho Estrutural e Funcional}}}\\[0.6cm]
+
+        {\large \textbf{\textcolor{SpaceGold}{Metamateriais Auxéticos e Deep Learning Guiado por Física (Physics-Guided ResNet)}}}\\[1.2cm]
+
+        {\normalsize \textbf{\textcolor{white}{Autor: Gabriel Marques de Andrade \quad | \quad Orientadora: Prof.ª Dr.ª Nila Cecília de Faria Lopes Medeiros}}}\\[0.3cm]
+        {\small \textcolor{gray!40}{Trabalho de Conclusão de Curso (TCC) -- Ilhéus, Bahia -- 2027}}
+        \vspace{0.8cm}
+    }
+}
+\clearpage
+
+% =============================================================================
+% SLIDE 2: Contextualização
+% =============================================================================
+\slideheader{Contextualização: A Era New Space e os Limites dos CubeSats 1U}{Crescimento de constelações LEO e restrições de massa e volume}{02}
+
+\begin{minipage}[t]{0.31\textwidth}
+    \textbf{\textcolor{NavyAccent}{Padrão CalPoly CDS}}\\[0.2cm]
+    \small
+    $\bullet$ Formato 1U: $100 \times 100 \times 113{,}5\text{ mm}$.\\
+    $\bullet$ Limite de massa: 1,33 kg a 2,0 kg.\\
+    $\bullet$ Estruturas monolíticas consomem até 35\% da massa útil total.\\
+    $\bullet$ Restrição severa de volume para eletrônicos e sensores.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.31\textwidth}
+    \textbf{\textcolor{NavyAccent}{Dispensador P-POD}}\\[0.2cm]
+    \small
+    $\bullet$ Poly-Picosatellite Orbital Deployer.\\
+    $\bullet$ Ejeção axial por mola sob atrito seco.\\
+    $\bullet$ Contato metal-metal em 4 trilhos guia.\\
+    $\bullet$ Impõe arestas maciças ($8{,}5 \times 8{,}5\text{ mm}$) sem protuberâncias ou alívios externos.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.31\textwidth}
+    \textbf{\textcolor{NavyAccent}{A Solução Metamaterial}}\\[0.2cm]
+    \small
+    $\bullet$ Trilhos externos intocados.\\
+    $\bullet$ Inovação concentrada nos painéis internos.\\
+    $\bullet$ Manufatura Aditiva Metálica (L-PBF) em liga aeroespacial AlSi10Mg.\\
+    $\bullet$ Redução massiva de peso com amortecimento passivo.
+\end{minipage}
+
+\slidefooter
+\clearpage
+
+% =============================================================================
+% SLIDE 3: O Problema
+% =============================================================================
+\slideheader{O Conflito de Engenharia: Rigidez, Massa e Cargas de Lançamento}{Ambiente dinâmico da norma NASA GEVS vs. integridade estrutural}{03}
+
+\begin{minipage}[t]{0.48\textwidth}
+    \textbf{\textcolor{NavyAccent}{Ambiente Dinâmico Severo (NASA GEVS)}}\\[0.2cm]
+    \small
+    $\bullet$ Vibração Aleatória Estocástica: $\mathbf{14{,}1\text{ G}_{\text{rms}}}$ (20 a 2000 Hz).\\
+    $\bullet$ Duração do ensaio de qualificação: 120 s por eixo ortogonal.\\
+    $\bullet$ Transmissibilidade em alumínio maciço $\approx 85\%$.\\
+    $\bullet$ Acelerações brutais transmitidas à carga útil ($\approx 12\text{ G}_{\text{rms}}$).\\
+    $\bullet$ Risco crítico de falha em juntas de solda de PCBs PC/104.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+    \textbf{\textcolor{NavyAccent}{O Dilema Tradicional de Projeto}}\\[0.2cm]
+    \small
+    $\bullet$ Alívio convencional de espessura reduz rigidez modal ($f_1 < 100\text{ Hz}$).\\
+    $\bullet$ Risco de acoplamento dinâmico ressonante ``pogo'' com o foguete.\\
+    $\bullet$ Amortecedores viscoelásticos adicionam peso e sofrem \textit{outgassing}.\\
+    $\bullet$ \textbf{Objetivo:} Aliviar $> 60\%$ de massa, elevar $f_1$ e atenuar passivamente as vibrações.
+\end{minipage}
+
+\slidefooter
+\clearpage
+
+% =============================================================================
+% SLIDE 4: Objetivos
+% =============================================================================
+\slideheader{Objetivos: Rota 100\% Computacional de Alto Desempenho}{Arquitetura preditiva e otimização sob normas espaciais}{04}
+
+\textbf{\textcolor{NavyAccent}{Objetivo Geral:}}
+Desenvolver e validar um arcabouço computacional autônomo para projeto, aceleração neural e otimização multiobjetivo de chassi CubeSat 1U em liga AlSi10Mg (L-PBF) com painéis auxéticos reentrantes sob normas NASA GEVS.
+\vspace{0.4cm}
+
+\begin{minipage}[t]{0.23\textwidth}
+    \textbf{\textcolor{SpaceNavy}{1. DfAM \& CAD}}\\[0.1cm]
+    \scriptsize
+    $\theta_{\text{overhang}} \ge 35^\circ$\\
+    $t \ge 0{,}50\text{ mm}$\\
+    $\text{gap} \ge 1{,}50\text{ mm}$
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.23\textwidth}
+    \textbf{\textcolor{SpaceNavy}{2. Automação CAE}}\\[0.1cm]
+    \scriptsize
+    Ansys SOLID187\\
+    Block Lanczos modal\\
+    PSD GEVS 14,1 G$_{\text{rms}}$
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.23\textwidth}
+    \textbf{\textcolor{SpaceNavy}{3. Physics ResNet}}\\[0.1cm]
+    \scriptsize
+    Perda Gibson-Ashby\\
+    Monotonicidade física\\
+    Inferência 0,4 ms
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.23\textwidth}
+    \textbf{\textcolor{SpaceNavy}{4. Multi-Agente}}\\[0.1cm]
+    \scriptsize
+    LangGraph determinístico\\
+    NSGA-II 10.000 avaliações\\
+    Seleção TOPSIS de voo
+\end{minipage}
+
+\slidefooter
+\clearpage
+
+% =============================================================================
+% SLIDE 5: Metamateriais Auxéticos
+% =============================================================================
+\slideheader{Fundamentação: Metamateriais Auxéticos e Leis de Escala}{Cinemática de Poisson negativo e modelo constitutivo de Gibson-Ashby}{05}
+
+\begin{minipage}[c]{0.52\textwidth}
+    \small
+    $\bullet$ \textbf{Poisson Efetivo Negativo ($\nu_{\text{eff}} < 0$):} Expansão transversal sob compressão axial e contração sob tração.\\
+    $\bullet$ \textbf{Mecanismo Celular:} Rotação e flexão de costelas oblíquas ($l$) articuladas em costelas verticais ($h$).\\
+    $\bullet$ \textbf{Dissipação Dinâmica:} Aumento da tenacidade e dispersão de ondas acústicas e choques de ejeção.\\
+    $\bullet$ \textbf{Leis de Gibson-Ashby (Deformação por Flexão):}
+    \begin{equation*}
+        \frac{E^*}{E_s} \approx C_1 \left(\frac{\rho^*}{\rho_s}\right)^2, \quad \frac{\sigma_y^*}{\sigma_{ys}} \approx C_2 \left(\frac{\rho^*}{\rho_s}\right)^{1{,}5}
+    \end{equation*}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{0.44\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/auxetic_cell_geometry.png}
+\end{minipage}
+
+\slidefooter
+\clearpage
+
+% =============================================================================
+% SLIDE 6: Normas NASA GEVS
+% =============================================================================
+\slideheader{Governança Normativa: Qualificação Espacial NASA GEVS}{NASA GSFC-STD-7000A e metodologia de fadiga de 3 bandas de Steinberg}{06}
+
+\begin{minipage}[t]{0.31\textwidth}
+    \textbf{\textcolor{NavyAccent}{1. Rigidez Veicular}}\\[0.2cm]
+    \small
+    $\bullet$ $f_1 \ge 100{,}0\text{ Hz}$.\\
+    $\bullet$ Desacoplamento modal contra modos acústicos e quase-estáticos do foguete.\\
+    $\bullet$ Previne acoplamento destrutivo com o veículo lançador.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.31\textwidth}
+    \textbf{\textcolor{NavyAccent}{2. Margem de Segurança}}\\[0.2cm]
+    \small
+    $\bullet$ Resposta estocástica a $3\sigma$ (99,73\% de probabilidade).\\
+    $\bullet$ Fator de segurança: $FS_{\text{yield}} = 1{,}25$.\\
+    $\bullet$ Tensão admissível: $\sigma_{\text{adm}} = 184{,}0\text{ MPa}$.\\
+    $\bullet$ $MS_{\text{yield}} = \frac{\sigma_{\text{adm}}}{\sigma_{3\sigma}} - 1 > 0$.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.31\textwidth}
+    \textbf{\textcolor{NavyAccent}{3. Fadiga de Steinberg}}\\[0.2cm]
+    \small
+    $\bullet$ Três bandas gaussianas ($1\sigma, 2\sigma, 3\sigma$).\\
+    $\bullet$ Regra de Palmgren-Miner.\\
+    $\bullet$ Critério NASA-HDBK-7005:
+    \begin{equation*}
+        D = \sum_{i=1}^3 \frac{n_i}{N_i} \le 0{,}25
+    \end{equation*}
+    $\bullet$ Fator de vida de $4\times$ (120 s).
+\end{minipage}
+
+\slidefooter
+\clearpage
+
+% =============================================================================
+% SLIDE 7: DfAM
+% =============================================================================
+\slideheader{Restrições de Manufatura Aditiva Metálica (DfAM -- LPBF)}{Portões paramétricos para garantia de fabricabilidade em liga AlSi10Mg}{07}
+
+\begin{minipage}[t]{0.31\textwidth}
+    \textbf{\textcolor{NavyAccent}{Ângulo de Sobressalto}}\\[0.2cm]
+    \small
+    $\bullet$ $\theta_{\text{overhang}} \ge 35^\circ$.\\
+    $\bullet$ Elimina suportes internos inalcançáveis no núcleo auxético.\\
+    $\bullet$ Evita acúmulo de tensões térmicas e empenamento.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.31\textwidth}
+    \textbf{\textcolor{NavyAccent}{Espessura de Costela}}\\[0.2cm]
+    \small
+    $\bullet$ Espessura mínima: $t \ge 0{,}50\text{ mm}$.\\
+    $\bullet$ Garante estabilidade da poça de fusão laser.\\
+    $\bullet$ Mitiga defeitos de falta de fusão e porosidades induzidas.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.31\textwidth}
+    \textbf{\textcolor{NavyAccent}{Evacuação de Pó}}\\[0.2cm]
+    \small
+    $\bullet$ Folga desobstruída: $\text{gap} \ge 1{,}50\text{ mm}$.\\
+    $\bullet$ Orifícios: $d_{\text{drain}} \ge 2{,}0\text{ mm}$.\\
+    $\bullet$ Previne aprisionamento de pó metálico (massa parasita oculta).
+\end{minipage}
+
+\slidefooter
+\clearpage
+
+% =============================================================================
+% SLIDE 8: Amostragem DoE
+% =============================================================================
+\slideheader{Amostragem do Espaço de Projeto: Hipercubo Latino (LHS)}{250 amostras paramétricas para exploração elastodinâmica global}{08}
+
+\begin{minipage}[t]{0.48\textwidth}
+    \textbf{\textcolor{NavyAccent}{Configuração do DoE Paramétrico}}\\[0.2cm]
+    \small
+    $\bullet$ Amostragem por Hipercubo Latino (LHS).\\
+    $\bullet$ Semente pseudoaleatória reproduzível (\texttt{seed=42}).\\
+    $\bullet$ Espaço 4D viável:
+    \begin{itemize}
+        \item $\theta \in [50^\circ, 85^\circ]$
+        \item $t \in [0{,}5, 1{,}8]\text{ mm}$
+        \item $l \in [6{,}0, 15{,}0]\text{ mm}$
+        \item $h \in [8{,}0, 20{,}0]\text{ mm}$
+    \end{itemize}
+    $\bullet$ 250 pontos em \texttt{doe\_samples\_input.csv}.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+    \textbf{\textcolor{NavyAccent}{Triagem Inicial DfAM}}\\[0.2cm]
+    \small
+    $\bullet$ 250 configurações submetidas aos portões DfAM.\\
+    $\bullet$ \textbf{181 amostras aprovadas (72,4\% de taxa de viabilidade)}.\\
+    $\bullet$ 69 amostras rejeitadas precocemente por colapso de folga de pó.\\
+    $\bullet$ Economia imediata de esforço computacional antes da fase de elementos finitos.
+\end{minipage}
+
+\slidefooter
+\clearpage
+
+% =============================================================================
+% SLIDE 9: Automação FEA
+% =============================================================================
+\slideheader{Simulação Numérica de Alta Ordem: Ansys MAPDL Batch}{Discretização com SOLID187, Block Lanczos e espectro estocástico PSD}{09}
+
+\begin{minipage}[t]{0.48\textwidth}
+    \textbf{\textcolor{NavyAccent}{Modelagem Numérica}}\\[0.2cm]
+    \small
+    $\bullet$ Elementos tetraédricos quadráticos \texttt{SOLID187} de 10 nós.\\
+    $\bullet$ Captura de gradientes em entalhes celulares.\\
+    $\bullet$ Análise modal pré-tensionada: Block Lanczos (10 modos).\\
+    $\bullet$ Análise espectral PSD NASA GEVS ($14{,}1\text{ G}_{\text{rms}}, \zeta = 2{,}0\%$).\\
+    $\bullet$ Runner batch resiliente com telemetria estruturada.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+    \textbf{\textcolor{NavyAccent}{Estatísticas da Base CAE (250 Pontos)}}\\[0.2cm]
+    \small
+    $\bullet$ Frequência $f_1$: Média = $746{,}3\text{ Hz}$ ($572{,}7$ a $1205{,}9\text{ Hz}$).\\
+    $\bullet$ Desacoplamento modal perfeito sobre o piso de 100 Hz.\\
+    $\bullet$ Tensão $3\sigma$ média = $85{,}7\text{ MPa}$ (limite = 184 MPa).\\
+    $\bullet$ Transmissibilidade média $T = 0{,}233$ (atenuação $> 76\%$).\\
+    $\bullet$ Dano de fadiga médio $D = 0{,}0061 \ll 0{,}25$.\\
+    $\bullet$ Tempo médio por simulação: 60 a 120 segundos.
+\end{minipage}
+
+\slidefooter
+\clearpage
+
+% =============================================================================
+% SLIDE 10: Physics-Guided ResNet
+% =============================================================================
+\slideheader{Metamodelo Neural: Physics-Guided ResNet}{Aprendizado residual profundo com função de perda composta informada por física}{10}
+
+\begin{minipage}[t]{0.48\textwidth}
+    \textbf{\textcolor{NavyAccent}{Arquitetura Deep Residual}}\\[0.2cm]
+    \small
+    $\bullet$ Entrada 5D: $[\theta, t, l, h, \rho_{\text{rel}}]$.\\
+    $\bullet$ 2 Blocos Residuais com conexões skip.\\
+    $\bullet$ 64 neurônios por camada, LayerNorm, SiLU.\\
+    $\bullet$ Saída 4D: $[f_1, \sigma_{3\sigma}, G_{\text{rms}}, T]$.\\
+    $\bullet$ Elimina desvanecimento de gradiente.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+    \textbf{\textcolor{NavyAccent}{Função de Perda Física Composta}}\\[0.2cm]
+    \small
+    $\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{MSE}} + \lambda_{\text{phys}}\mathcal{L}_{\text{GA}} + \lambda_{\text{mono}}\mathcal{L}_{\text{mono}}$\\[0.2cm]
+    $\bullet$ $\mathcal{L}_{\text{GA}}$: Penaliza desvios assintóticos da lei de Gibson-Ashby ($f_1 \propto \sqrt{\rho_{\text{rel}}}$).\\
+    $\bullet$ $\mathcal{L}_{\text{mono}}$: Penalização ReLU para impor monotonicidade física estrita.\\
+    $\bullet$ Erradica alucinações e previsões não-físicas.
+\end{minipage}
+
+\slidefooter
+\clearpage
+
+% =============================================================================
+% SLIDE 11: Paridade Neural
+% =============================================================================
+\slideheader{Desempenho da Rede: Paridade e Benchmarks}{Acurácia superior a 98,7\% e aceleração computacional de 250.000x}{11}
+
+\begin{minipage}[c]{0.35\textwidth}
+    \small
+    \textbf{Métricas no Teste Cego ($N=50$):}\\
+    $\bullet$ $\overline{R^2} = 0{,}9874$ (acurácia $98{,}74\%$).\\
+    $\bullet$ $\text{NRMSE}_{\text{médio}} = 2{,}07\%$.\\
+    $\bullet$ $R^2 (\sigma_{3\sigma}) = 0{,}9989$ | NRMSE = 0,73\%\\
+    $\bullet$ $R^2 (T) = 0{,}9981$ | NRMSE = 0,94\%\\
+    $\bullet$ $R^2 (f_1) = 0{,}9543$ | NRMSE = 5,68\%\\[0.3cm]
+    \textbf{Latência de Inferência:}\\
+    $\mathbf{0{,}405\text{ ms}}$ ($> 2.400$ avaliações/s).\\
+    Aceleração de $\approx \mathbf{250.000\times}$ frente ao FEA.
+\end{minipage}
+\hfill
+\begin{minipage}[c]{0.62\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/parity_plots.png}
+\end{minipage}
+
+\slidefooter
+\clearpage
+
+% =============================================================================
+% SLIDE 12: LangGraph
+% =============================================================================
+\slideheader{Orquestração Determinística via LangGraph}{Máquina de estados fortemente tipada com triagem prévia automática}{12}
+
+\begin{minipage}[c]{0.35\textwidth}
+    \small
+    \textbf{Governança Multi-Agente:}\\
+    $\bullet$ Contrato de estado: \texttt{CubeSatState}.\\
+    $\bullet$ Nós especialistas:\\
+    \quad - \texttt{CadDfamAgent}\\
+    \quad - \texttt{NeuralSurrogateAgent}\\
+    \quad - \texttt{GevsQualifierAgent}\\
+    \quad - \texttt{GroundTruthFeaAgent}\\
+    $\bullet$ Descarte precoce de candidatos inviáveis.\\
+    $\bullet$ Trilha de auditoria cronológica UTC.
+\end{minipage}
+\hfill
+\begin{minipage}[c]{0.62\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/multi_agent_workflow.png}
+\end{minipage}
+
+\slidefooter
+\clearpage
+
+% =============================================================================
+% SLIDE 13: NSGA-II
+% =============================================================================
+\slideheader{Otimização Multiobjetivo: Algoritmo NSGA-II}{Busca evolutiva de 10.000 avaliações com Deb's Constrained Domination}{13}
+
+\begin{minipage}[t]{0.48\textwidth}
+    \textbf{\textcolor{NavyAccent}{Formulação Multiobjetivo Restrita}}\\[0.2cm]
+    \small
+    $\min f_1(\mathbf{x}) = \text{Massa Estrutural (kg)}$\\
+    $\min f_2(\mathbf{x}) = \text{Transmissibilidade Dinâmica } (T)$\\[0.2cm]
+    Sujeito a:
+    \begin{itemize}
+        \item $\theta \in [50^\circ, 85^\circ], t \in [0{,}5, 1{,}8]\text{ mm}, l \in [6, 15]\text{ mm}, h \in [8, 20]\text{ mm}$
+        \item $\theta_{\text{overhang}} \ge 35^\circ$ (DfAM)
+        \item $t \ge 0{,}50\text{ mm}, \text{gap} \ge 1{,}50\text{ mm}$ (DfAM)
+        \item $f_1 \ge 100\text{ Hz}$ (NASA GEVS)
+        \item $MS_{\text{yield}} > 0$ (NASA GEVS)
+        \item $D_{\text{Steinberg}} \le 0{,}25$ (NASA-HDBK-7005)
+    \end{itemize}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+    \textbf{\textcolor{NavyAccent}{Parâmetros e Performance}}\\[0.2cm]
+    \small
+    $\bullet$ População = 100 indivíduos | Gerações = 100.\\
+    $\bullet$ Total: \textbf{10.000 avaliações de candidatos}.\\
+    $\bullet$ Cruzamento SBX ($\eta_c=15, p_c=0{,}90$).\\
+    $\bullet$ Mutação Polinomial ($\eta_m=20, p_m=0{,}25$).\\
+    $\bullet$ Deb's Constrained Domination (prioridade a viáveis).\\
+    $\bullet$ \textbf{Tempo de Execução:} \textbf{4,82 segundos!}\\
+    $\bullet$ Equivalente no Ansys: $\approx \mathbf{277\text{ horas}}$ ininterruptas.
+\end{minipage}
+
+\slidefooter
+\clearpage
+
+% =============================================================================
+% SLIDE 14: Fronteira de Pareto
+% =============================================================================
+\slideheader{Fronteira de Pareto e Trade-offs Estruturais}{100 designs Pareto-ótimos factíveis mapeando o espaço de compromisso}{14}
+
+\begin{minipage}[c]{0.35\textwidth}
+    \small
+    \textbf{Análise dos Regimes Físicos:}\\[0.2cm]
+    \textbf{1. Regime Ultraleve ($m < 0{,}10\text{ kg}$):}\\
+    $\bullet$ Células esbeltas ($t \to 0{,}50\text{ mm}$).\\
+    $\bullet$ Densidade relativa $< 10\%$.\\
+    $\bullet$ Transmissibilidade $T \approx 0{,}23 - 0{,}28$.\\
+    $\bullet$ Tensões $3\sigma \approx 180\text{ MPa}$.\\[0.2cm]
+    \textbf{2. Regime de Ultra-Atenuação ($T < 0{,}18$):}\\
+    $\bullet$ Costelas espessas ($t \approx 0{,}8 - 1{,}1\text{ mm}$).\\
+    $\bullet$ Ângulos reentrantes pronunciados ($70^\circ-80^\circ$).\\
+    $\bullet$ Efeito auxético 3D maximizado.\\
+    $\bullet$ Massa estrutural $m \approx 0{,}14 - 0{,}16\text{ kg}$.
+\end{minipage}
+\hfill
+\begin{minipage}[c]{0.62\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/pareto_frontier.png}
+\end{minipage}
+
+\slidefooter
+\clearpage
+
+% =============================================================================
+% SLIDE 15: Seleção TOPSIS
+% =============================================================================
+\slideheader{Tomada de Decisão Multicritério: TOPSIS}{Eleição do Design de Voo Ótimo (\#28) com equilíbrio de objetivos aeroespaciais}{15}
+
+\begin{minipage}[t]{0.48\textwidth}
+    \textbf{\textcolor{NavyAccent}{Ponderação Multicritério}}\\[0.2cm]
+    \small
+    Vetor de Pesos Aeroespacial:
+    \begin{itemize}
+        \item $w_m = 0{,}35$ (Massa estrutural -- custo)
+        \item $w_T = 0{,}30$ (Transmissibilidade -- custo)
+        \item $w_{f_1} = 0{,}15$ (Frequência fundamental -- benefício)
+        \item $w_{\sigma} = 0{,}10$ (Tensão $3\sigma$ -- custo)
+        \item $w_D = 0{,}10$ (Dano de fadiga -- custo)
+    \end{itemize}
+    \textbf{Resultado TOPSIS:}\\
+    Design \#28 eleito com maior proximidade relativa ($C_{28}^* = 0{,}814$).
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+    \textbf{\textcolor{NavyAccent}{Geometria do Design \#28}}\\[0.2cm]
+    \small
+    $\bullet$ Ângulo reentrante: $\theta = 65{,}75^\circ$\\
+    $\bullet$ Espessura de costela: $t = 0{,}613\text{ mm}$\\
+    $\bullet$ Comprimento oblíquo: $l = 8{,}50\text{ mm}$\\
+    $\bullet$ Altura vertical: $h = 13{,}96\text{ mm}$\\
+    $\bullet$ Densidade relativa: $\rho^* / \rho_s = 12{,}52\%$\\
+    $\bullet$ \textbf{Coeficiente de Poisson:} $\mathbf{\nu_{\text{eff}} = -13{,}81}$\\[0.2cm]
+    Comportamento fortemente auxético tridimensional proporcionando atenuação acústica passiva.
+\end{minipage}
+
+\slidefooter
+\clearpage
+
+% =============================================================================
+% SLIDE 16: Validação FEA Ground Truth
+% =============================================================================
+\slideheader{Validação Cruzada: FEA Ground Truth vs. ResNet}{Confronto de alta fidelidade no Ansys MAPDL para o Design Ótimo \#28}{16}
+
+\centering
+\small
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Resposta Estrutural} & \textbf{Predição Neural} & \textbf{FEA Ground Truth} & \textbf{Erro (\%)} & \textbf{Limite NASA} & \textbf{Status} \\
+\midrule
+Massa Total ($m$) & 0,1155 kg & 0,1155 kg & 0,00\% & $\le 0{,}350\text{ kg}$ & \textcolor{ApprovedGreen}{\textbf{Aprovado}} \\
+Frequência Fundamental ($f_1$) & 642,38 Hz & 579,62 Hz & $+10{,}83\%$ & $\ge 100{,}0\text{ Hz}$ & \textcolor{ApprovedGreen}{\textbf{Aprovado}} \\
+Pico de Tensão $3\sigma$ & 168,57 MPa & 166,91 MPa & $\mathbf{+0{,}99\%}$ & $\le 184{,}0\text{ MPa}$ & \textcolor{ApprovedGreen}{\textbf{Aprovado}} \\
+Aceleração na Carga Útil & 2,814 G$_{\text{rms}}$ & 2,816 G$_{\text{rms}}$ & $-0{,}07\%$ & $\le 14{,}1\text{ G}_{\text{rms}}$ & \textcolor{ApprovedGreen}{\textbf{Aprovado}} \\
+Transmissibilidade ($T$) & 0,19973 & 0,19974 & $\mathbf{-0{,}008\%}$ & $< 1{,}00$ & \textcolor{ApprovedGreen}{\textbf{Aprovado}} \\
+Margem de Segurança ($MS$) & $+0{,}092$ & $+0{,}102$ & $-9{,}80\%$ & $> 0{,}00$ & \textcolor{ApprovedGreen}{\textbf{Aprovado}} \\
+Dano de Fadiga (Steinberg) & 0,0543 & 0,0458 & $+18{,}56\%$ & $\le 0{,}25$ & \textcolor{ApprovedGreen}{\textbf{Aprovado}} \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3cm}
+\footnotesize
+Concordância notável entre a inteligência computacional e o solver de elementos finitos (\texttt{SOLID187}).
+
+\slidefooter
+\clearpage
+
+% =============================================================================
+% SLIDE 17: Benchmark Frente ao Sólido
+% =============================================================================
+\slideheader{Benchmark: Chassi Monolítico Convencional vs. Chassi Auxético Ótimo}{Salto de desempenho aeroespacial e eficiência estrutural}{17}
+
+\begin{minipage}[t]{0.31\textwidth}
+    \textbf{\textcolor{NavyAccent}{Massa Estrutural}}\\[0.2cm]
+    \small
+    $\bullet$ Baseline Sólido: $0{,}308\text{ kg}$\\
+    $\bullet$ Chassi Auxético: $0{,}116\text{ kg}$\\[0.2cm]
+    \textbf{\textcolor{ApprovedGreen}{REDUÇÃO DE 62,49\%}}\\[0.2cm]
+    $\bullet$ 192 gramas economizados.\\
+    $\bullet$ Convertíveis em baterias adicionais ou sensores científicos.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.31\textwidth}
+    \textbf{\textcolor{NavyAccent}{Isolamento Vibratório}}\\[0.2cm]
+    \small
+    $\bullet$ Transmissibilidade: $0{,}850 \to 0{,}1997$\\[0.2cm]
+    \textbf{\textcolor{ApprovedGreen}{ATENUAÇÃO DE 76,50\%}}\\
+    \textbf{\textcolor{ApprovedGreen}{(12,6 dB de atenuação)}}\\[0.2cm]
+    $\bullet$ Aceleração cai de $12{,}0$ para $2{,}82\text{ G}_{\text{rms}}$.\\
+    $\bullet$ Elimina necessidade de coxins e isoladores viscoelásticos.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.31\textwidth}
+    \textbf{\textcolor{NavyAccent}{Rigidez \& Fadiga}}\\[0.2cm]
+    \small
+    $\bullet$ $f_1$ sobe de $512$ para $579{,}6\text{ Hz}$ ($+13{,}20\%$).\\
+    $\bullet$ Rigidez dinâmica específica ($f_1/m$) amplamente superior.\\
+    $\bullet$ $MS_{\text{yield}} = +0{,}10$ (Plenamente elástico).\\
+    $\bullet$ Dano $D = 0{,}046$ (Qualificado NASA).
+\end{minipage}
+
+\slidefooter
+\clearpage
+
+% =============================================================================
+% SLIDE 18: Conclusões
+% =============================================================================
+\slideheader{Conclusões e Principais Contribuições}{Validação completa do arcabouço computacional autônomo de alta fidelidade}{18}
+
+\begin{minipage}[t]{0.48\textwidth}
+    \textbf{\textcolor{NavyAccent}{Metas Alcançadas}}\\[0.2cm]
+    \small
+    1. Concepção e parametrização DfAM de chassi auxético 1U em liga AlSi10Mg.\\
+    2. Redução de 62,49\% na massa estrutural mantendo conformidade CalPoly CDS.\\
+    3. Atenuação dinâmica de 76,50\% na carga útil sem amortecedores externos.\\
+    4. Qualificação estrutural plena sob normas NASA GSFC-STD-7000A e NASA-HDBK-7005.\\
+    5. Metamodelo neural acelerou o laço genético em mais de $200.000\times$.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+    \textbf{\textcolor{NavyAccent}{Contribuições Técnicas}}\\[0.2cm]
+    \small
+    $\bullet$ \textbf{Physics-Guided ResNet:} Perda informada por Gibson-Ashby e monotonicidade de rigidez.\\
+    $\bullet$ \textbf{LangGraph Determinístico:} Auditoria UTC e triagem de descarte precoce.\\
+    $\bullet$ \textbf{Interface P-POD:} Preservação de arestas maciças ($8{,}5 \times 8{,}5\text{ mm}$) para deslizamento cinemático.\\
+    $\bullet$ \textbf{Reprodutibilidade:} 53 testes automatizados (100\% pass).
+\end{minipage}
+
+\slidefooter
+\clearpage
+
+% =============================================================================
+% SLIDE 19: Trabalhos Futuros
+% =============================================================================
+\slideheader{Trabalhos Futuros e Próximos Passos}{Extensões experimentais e escalonamento para envelopes espaciais estendidos}{19}
+
+\begin{minipage}[t]{0.31\textwidth}
+    \textbf{\textcolor{NavyAccent}{1. Validação Experimental}}\\[0.2cm]
+    \small
+    $\bullet$ Manufatura física de espécimes L-PBF em máquina industrial com pó AlSi10Mg.\\
+    $\bullet$ Ensaios dinâmicos em mesa vibratória triaxial (\textit{shaker table}).\\
+    $\bullet$ Confronto espectral direto das PSDs física e numérica.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.31\textwidth}
+    \textbf{\textcolor{NavyAccent}{2. Ciclagem Térmica (TVAC)}}\\[0.2cm]
+    \small
+    $\bullet$ Ensaio em câmara de termovácuo ($-40^\circ\text{C}$ a $+85^\circ\text{C}$ em $10^{-6}\text{ Torr}$).\\
+    $\bullet$ Condutividade térmica anisotrópica do núcleo auxético.\\
+    $\bullet$ Dissipação térmica em eclipses orbitais LEO.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.31\textwidth}
+    \textbf{\textcolor{NavyAccent}{3. Escalonamento 3U / 6U}}\\[0.2cm]
+    \small
+    $\bullet$ Extensão da parametrização para envelopes maiores.\\
+    $\bullet$ Núcleos auxéticos com Gradação Funcional de Densidade (FGL) tridimensional contínua.\\
+    $\bullet$ Degradação por oxigênio atômico (AO) em LEO.
+\end{minipage}
+
+\slidefooter
+\clearpage
+
+% =============================================================================
+% SLIDE 20: Agradecimentos
+% =============================================================================
+\noindent
+\colorbox{SpaceNavy}{
+    \parbox[c][12.2cm][c]{\dimexpr\textwidth-2\fboxsep\relax}{
+        \centering
+        \vspace{1.2cm}
+        {\Huge \textbf{\textcolor{SpaceGold}{MUITO OBRIGADO PELA ATENÇÃO!}}}\\[1.0cm]
+        {\normalsize \textbf{\textcolor{white}{Agradecimentos à Universidade Estadual de Santa Cruz (UESC), ao Colegiado de Engenharia Mecânica}}}\\[0.2cm]
+        {\normalsize \textbf{\textcolor{white}{e à orientadora Prof.ª Dr.ª Nila Cecília de Faria Lopes Medeiros.}}}\\[1.0cm]
+        {\small \textbf{\textcolor{SpaceGold}{Repositório do Projeto: https://github.com/Marques-svnt/tcc-cubesats}}}\\[0.6cm]
+        {\large \textbf{\textcolor{white}{Estamos à disposição para a arguição e considerações da banca examinadora.}}}
+        \vspace{1.2cm}
+    }
+}
+
+\end{document}

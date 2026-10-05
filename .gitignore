@@ -84,3 +84,15 @@ Referencial-*.zip
 scratch/
 temp/
 logs/*.log
+
+# --- LaTeX Auxiliares ---
+*.aux
+*.out
+*.toc
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+*.synctex.gz
+
