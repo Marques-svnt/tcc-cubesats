@@ -74,7 +74,15 @@ A democratização do acesso à baixa órbita terrestre por meio de nanossatéli
 
 [5.4 Análise Comparativa de Desempenho Aeroespacial: Chassi Auxético Ótimo vs. Chassi Monolítico Convencional	37](#5.4-análise-comparativa-de-desempenho-aeroespacial-chassi-auxético-ótimo-vs-chassi-monolítico-convencional)
 
-[**REFERÊNCIAS BIBLIOGRÁFICAS	40**](#referências-bibliográficas)
+[**6 CONCLUSÃO E TRABALHOS FUTUROS	40**](#6-conclusão-e-trabalhos-futuros)
+
+[6.1 Síntese das Conquistas e Objetivos Atingidos	40](#6.1-síntese-das-conquistas-e-objetivos-atingidos)
+
+[6.2 Principais Contribuições Técnicas e Metodológicas	42](#6.2-principais-contribuições-técnicas-e-metodológicas)
+
+[6.3 Limitações do Estudo e Recomendações para Trabalhos Futuros	44](#6.3-limitações-do-estudo-e-recomendações-para-trabalhos-futuros)
+
+[**REFERÊNCIAS BIBLIOGRÁFICAS	46**](#referências-bibliográficas)
 
 # **1 INTRODUÇÃO** {#1-introdução}
 
@@ -593,7 +601,44 @@ Os dados da Tabela 12 consolidam as vantagens substanciais do chassi metamateria
 2. **Isolamento Vibratório Passivo de Alto Desempenho ($76{,}50\%$ de atenuação):** Em estruturas monolíticas de alumínio, a baixa dissipação interna faz com que cerca de $85\%$ das acelerações dinâmicas impostas pelo veículo lançador atinjam diretamente a carga útil ($12{,}00\text{ G}_{\text{rms}}$). A inclusão do núcleo auxético reentrante com $\nu_{\text{eff}} = -13{,}81$ atenuou essa resposta para apenas $2{,}82\text{ G}_{\text{rms}}$, atuando como um filtro passa-baixa e dissipador de ondas elásticas que elimina a necessidade de coxins e amortecedores viscoelásticos externos (que agregam peso e sofrem degradação por desgasificação em vácuo orbital).
 3. **Rigidez Dinâmica Específica Aprimorada ($+13{,}20\%$ em $f_1$):** A concentração de material nas quatro arestas sólidas de deslizamento ($8{,}5 \times 8{,}5\text{ mm}$), combinada ao gradiente funcional de rigidez dos painéis, garantiu que a frequência fundamental se elevasse para $579{,}6\text{ Hz}$, desmistificando o paradigma de que estruturas celulares aliviadas seriam excessivamente flexíveis.
 
-Em suma, os resultados obtidos comprovam experimentalmente e numericamente a eficácia da abordagem computacional autônoma, validando o chassi auxético otimizado como uma solução tecnicamente superior, segura e plenamente qualificada segundo os mais rigorosos padrões da indústria espacial internacional.
+# **6 CONCLUSÃO E TRABALHOS FUTUROS** {#6-conclusão-e-trabalhos-futuros}
+
+O presente Trabalho de Conclusão de Curso estabeleceu e validou um arcabouço computacional autônomo e de alta fidelidade para o projeto, aceleração preditiva neural e otimização multiobjetivo de chassis de nanossatélites da classe CubeSat 1U, incorporando painéis com microestruturas metamateriais auxéticas reentrantes manufaturadas aditivamente em liga aeroespacial AlSi10Mg por Fusão em Leito de Pó a Laser (L-PBF).
+
+---
+
+### **6.1 Síntese das Conquistas e Objetivos Atingidos** {#6.1-síntese-das-conquistas-e-objetivos-atingidos}
+
+A integração sinérgica entre parametrização geométrica compatível com restrições DfAM, automação de simulações em elementos finitos (*Ansys MAPDL*), aprendizado profundo guiado por leis físicas (*Physics-Guided ResNet*), orquestração multi-agente determinística (*LangGraph*) e algoritmos genéticos multiobjetivo (*NSGA-II* acoplado ao *TOPSIS*) permitiu atingir integralmente os objetivos estabelecidos, destacando-se as seguintes conquistas quantitativas:
+
+1. **Alívio Massivo de Massa Estrutural ($-62{,}49\%$):** A massa do chassi CubeSat 1U foi reduzida de $0{,}308\text{ kg}$ (no modelo monolítico tradicional de alumínio sólido) para apenas **$0{,}116\text{ kg}$** no design ótimo eleito. Essa redução poupa aproximadamente $192\text{ g}$ do orçamento de massa da plataforma, viabilizando o embarque de baterias adicionais, módulos de propulsão ou sensores de sensoriamento remoto de maior porte dentro do limite padrão de 1,33 kg a 2,0 kg regulamentado pela especificação CalPoly CDS.
+2. **Isolamento Vibratório e Amortecimento Passivo ($76{,}50\%$ de atenuação):** A transmissibilidade dinâmica das acelerações do veículo lançador para a carga útil decresceu de $0{,}850$ para **$0{,}1997$**, representando uma atenuação espectral de **$12{,}6\text{ dB}$**. O núcleo metamaterial auxético com coeficiente de Poisson negativo acentuado ($\nu_{\text{eff}} = -13{,}81$) funcionou eficazmente como um filtro mecânico passivo, atenuando a densidade espectral de potência e reduzindo a aceleração eficaz na carga útil de $12{,}00\text{ G}_{\text{rms}}$ para $2{,}82\text{ G}_{\text{rms}}$.
+3. **Rigidez Específica Dinâmica e Desacoplamento Ressonante ($+13{,}20\%$ em $f_1$):** A primeira frequência natural fundamental do chassi alcançou **$579{,}62\text{ Hz}$** na solução numérica de alta ordem (e $642{,}38\text{ Hz}$ na predição neural), superando em quase seis vezes o limite normativo rígido de $100{,}0\text{ Hz}$ exigido por veículos lançadores institucionais e comerciais para evitar acoplamento dinâmico com modos quase-estáticos e acústicos de empuxo.
+4. **Qualificação Estrutural e de Fadiga sob Diretrizes NASA GEVS:** O ponto de projeto eleito apresentou Margem de Segurança positiva contra o escoamento ($MS_{\text{yield}} = +0{,}102 > 0$ para $FS_{\text{yield}} = 1{,}25$) sob solicitações estocásticas de $3\sigma$ ($166{,}91\text{ MPa}$ frente à tensão admissível de $184{,}0\text{ MPa}$) e dano acumulado de fadiga vibracional de Steinberg de **$D = 0{,}046$**, substancialmente inferior ao patamar conservador de qualificação aeroespacial da norma NASA-HDBK-7005 ($D \le 0{,}25$), garantindo um fator de segurança de vida à fadiga superior a $5{,}4\times$.
+5. **Aceleração Computacional de Larga Escala ($> 200.000\times$):** O modelo substituto neural *CubeSatSurrogateResNet* exibiu latência de inferência de **$0{,}405\text{ ms}$** e coeficiente de determinação médio $\overline{R^2} = 0{,}9874$, viabilizando a avaliação de 10.000 indivíduos na busca evolutiva do NSGA-II em **4,82 segundos**, frente às 277 horas que seriam demandadas pelo solver numérico FEA contínuo.
+
+---
+
+### **6.2 Principais Contribuições Técnicas e Metodológicas** {#6.2-principais-contribuições-técnicas-e-metodológicas}
+
+O trabalho contribui de maneira original para a engenharia aeroespacial e de materiais nos seguintes tópicos:
+
+- **Formulação Neural Guiada por Leis Fenomenológicas (PINN/ResNet):** A introdução da função de perda composta $\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{MSE}} + \lambda_{\text{phys}}\mathcal{L}_{\text{GA}} + \lambda_{\text{mono}}\mathcal{L}_{\text{mono}}$ garantiu aderência assintótica às leis de escalonamento elástico de Gibson-Ashby e impôs monotonicidade na relação rigidez-densidade, erradicando alucinações e comportamentos fisicamente anômalos comuns em redes neurais de regressão caixa-preta;
+- **Governança Determinística Multi-Agente via LangGraph:** A estruturação do fluxo de projeto em uma máquina de estados finitos fortemente tipada e com roteamento condicional antecipado assegurou que apenas geometrias conformes aos portões DfAM e às restrições da NASA GEVS avançassem para simulações numéricas de alta ordem, gerando um pipeline de engenharia reproduzível, auditável e altamente eficiente;
+- **Síntese Metamaterial Aplicada a Requisitos Espaciais Reais:** Demonstrou-se que a preservação de arestas monolíticas maciças ($8{,}5 \times 8{,}5\text{ mm}$) para interface cinemática e deslizamento com o dispensador P-POD, combinada à gradação de espessura de paredes das células auxéticas internas, é plenamente viável segundo as diretrizes industriais de manufatura aditiva L-PBF em AlSi10Mg.
+
+---
+
+### **6.3 Limitações do Estudo e Recomendações para Trabalhos Futuros** {#6.3-limitações-do-estudo-e-recomendações-para-trabalhos-futuros}
+
+Como extensões naturais e aprofundamentos da presente pesquisa, recomendam-se as seguintes etapas para trabalhos futuros:
+
+1. **Validação Experimental em Mesa Vibratória (*Shaker Table*):** Manufatura física de espécimes do chassi otimizado em máquina L-PBF industrial com pó de AlSi10Mg pós-tratado termicamente, seguida de ensaios dinâmicos em mesa vibratória triaxial sob a densidade espectral de potência (PSD) da NASA GSFC-STD-7000A ($14{,}1\text{ G}_{\text{rms}}$, 20 a 2000 Hz) para confronto direto das curvas de transmissibilidade experimental e numérica;
+2. **Caracterização Termoelástica e Acoplamento Térmico em Órbita (TVAC):** Avaliação computacional e experimental do comportamento termoestrutural sob os ciclos térmicos extremos de órbita baixa terrestre ($-40^\circ\text{C}$ a $+85^\circ\text{C}$ em vácuo de $10^{-6}\text{ Torr}$), investigando o efeito da condutividade térmica anisotrópica do núcleo auxético na dissipação de calor dos subsistemas eletrônicos;
+3. **Expansão para Fatores de Forma Maiores (3U, 6U e 12U):** Aplicação da metodologia desenvolvida em envelopes estruturais estendidos, incorporando núcleos auxéticos com Gradação Funcional de Densidade (FGL) tridimensional contínua otimizada topologicamente para missões com requisitos de apontamento óptico e cargas úteis pesadas;
+4. **Análise de Degradação Ambiental em Ambiente LEO:** Investigação da interação superficial das estruturas celulares com oxigênio atômico (AO), radiação ionizante ultravioleta (UV) e risco de impacto de micrometeoritos e detritos espaciais (*space debris*).
+
+---
 
 # **REFERÊNCIAS BIBLIOGRÁFICAS** {#referências-bibliográficas}
 
@@ -604,19 +649,23 @@ California Polytechnic State University. **CubeSat Design Specification** (CDS).
 COLLINI, F.; MENEGHETTI, G. **Towards a fracture mechanics-based fatigue assessment of lattice structures obtained from additive manufacturing of metallic powders.** Materials & Design, v. 244, p. 113077, 2024\.  
 CUI, L.; ZHANG, H.; WANG, X. **Effective elastic modulus and energy absorption performance of hybrid chiral re-entrant honeycombs.** International Journal of Mechanical Sciences, v. 288, p. 109845, 2025\.  
 DAI, S. et al. **Orthotropic elastic behaviors and yield strength of fused deposition modeling materials: Theory and experiments.** Polymer Testing, v. 87, p. 106520, 2020\.   
+DEB, K. et al. **A fast and elitist multiobjective genetic algorithm: NSGA-II.** IEEE Transactions on Evolutionary Computation, v. 6, n. 2, p. 182–197, 2002.  
 FARSHBAF, M.; JAVANBAKHT, M. **Deformation and collapse behavior of additively manufactured re-entrant auxetic lattices.** Thin-Walled Structures, v. 206, p. 112510, 2025\.   
-GIBSON, L. J.; ASHBY, M. F. **Cellular solids: structure and properties.** \[S.l.\]: Cambridge University Press, 1997\.  
+GIBSON, L. J.; Ashby, M. F. **Cellular solids: structure and properties.** \[S.l.\]: Cambridge University Press, 1997\.  
 HERNANDEZ, R. et al. **Analyzing the tensile, compressive, and flexural properties of 3d printed abs p430 plastic based on printing orientation using fused deposition modeling.** In: Proceedings of the 27th Annual International Solid Freeform Fabrication Symposium. Austin, TX: \[s.n.\], 2016\.  
+HWANG, C. L.; YOON, K. **Multiple attribute decision making: methods and applications.** New York: Springer-Verlag, 1981.  
 KHAN, S. A.; RICCIO, A. **Design for additive manufacturing of aerospace lattice structures: A review.** Progress in Aerospace Sciences, v. 144, p. 100971, 2024\.  
 LI, Y. et al. **The structure design and application of metamaterials with negative poisson’s ratio.** EPJ Applied Metamaterials, v. 13, p. 5, 2026\.   
 LIMA, E. G.; MANEA, S.; SANTOS, W. G. d. **Modelagem e simulação do processo de ejeção de cubesats.** In: Anais do XII Workshop em Engenharia e Tecnologia Espaciais. São José dos Campos, SP: \[s.n.\], 2021\.  
 MANTOVANI, L. Q.; SANTOS, W. G. d.; CARDOSO-RIBEIRO, F. L. **Vibration analysis of the cubesat sport boom’s through a flexible multi-body model.** In: Proceedings of the XLI CILAMCE. Foz do Iguaçu, PR: \[s.n.\], 2020\.  
+National Aeronautics and Space Administration. **Dynamic Environmental Criteria.** Washington, D.C.: NASA, 2001. (NASA-HDBK-7005).  
 National Aeronautics and Space Administration. **General Environmental Verification Standard (GEVS) for GSFC Flight Programs and Projects.** \[S.l.\], 2013\. (GSFC-STD-7000A).  
 POZORSKI, Z.; ANDRZEJEWSKI, J. **Experimental determination of mechanical properties of 3d printed pla. methodology for testing orthotropic materials.** Polymer Testing, v. 149, p. 108860, 2025\.   
 PUIG-SUARI, J. c.; TURNER, C. S.; AHLGREN, B. **Development of the standard cubesat deployer and a cubesat class picosatellite**. In: IEEE Aerospace Conference Proceedings. \[S.l.: s.n.\], 2002\. v. 1, p. 347–354.   
 ROBERTS, J. A. **Design and testing of an additively manufactured CubeSat structural bus.** Tese (Doutorado) — Naval Postgraduate School, Monterey, CA, 2018\.   
 SANTOS, W. G.; MANEA, S.; CARRARA, V. D**ynamic analysis of the sport cubesat structural assembly.** In: Proceedings of the CILAMCE 2020\. Foz do Iguaçu, PR: \[s.n.\], 2020\.   
 SLEJKO, M.; SALI, M.; FRANCESCONI, A. **Design and structural qualification of an innovative cubesat primary structure.** Aerospace Science and Technology, v. 138, p. 108342, 2023\.  
+STEINBERG, D. S. **Vibration analysis for electronic equipment.** 3. ed. New York: John Wiley & Sons, 2000.    
 ZHONG, H. et al. T**he gibson-ashby model for additively manufactured metal lattice materials: Its theoretical basis, limitations and new insights from remedies.** Current Opinion in Solid State & Materials Science, v. 27, p. 101081, 2023\.  
 ZIMMERMAN, B. K. et al. **Investigating property-porosity relationships for micro-architected lattice structures.** Scientific Reports, v. 16, p. 5521, 2026
 
