@@ -1,0 +1,35 @@
+{
+  "optimal_flight_design": {
+    "theta_deg": 65.74745178222656,
+    "thickness_t_mm": 0.6128978729248047,
+    "length_l_mm": 8.497245788574219,
+    "height_h_mm": 13.961511611938477,
+    "relative_density": 0.1251990512258362,
+    "poisson_ratio": -13.805618516636795
+  },
+  "surrogate_predicted_responses": {
+    "total_mass_kg": 0.11554379126968395,
+    "f1_hz": 642.384765625,
+    "peak_stress_3sigma_mpa": 168.57022094726562,
+    "payload_grms": 2.813800573348999,
+    "transmissibility": 0.1997259110212326,
+    "margin_of_safety_yield": 0.09153324333341972,
+    "fatigue_damage_steinberg": 0.054306105195654736
+  },
+  "fea_ground_truth_responses": {
+    "first_natural_freq_hz": 579.6173673852703,
+    "peak_3sigma_stress_mpa": 166.90543637004757,
+    "payload_grms": 2.8163690747497614,
+    "transmissibility_ratio": 0.19974248757090507,
+    "margin_of_safety_yield": 0.1024206520874007,
+    "fatigue_damage_steinberg": 0.04575994986401209,
+    "is_nasa_gevs_compliant": true
+  },
+  "conventional_baseline_comparison": {
+    "baseline_mass_kg": 0.308,
+    "baseline_transmissibility": 0.85,
+    "baseline_f1_hz": 512.0,
+    "mass_reduction_percent": 62.48578205529742,
+    "vibration_attenuation_gain_percent": 76.50283399750205
+  }
+}
