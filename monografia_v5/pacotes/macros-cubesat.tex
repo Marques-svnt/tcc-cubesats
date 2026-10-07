@@ -1,0 +1,64 @@
+% ==========================================================================
+% macros-cubesat.tex
+% Pacotes adicionais, configurações tipográficas e macros do projeto CubeSat
+% Compatibilidade: ppgmc-uesc.cls / Overleaf / TeX Live 2023-2026
+% ==========================================================================
+
+% Fonte Times New Roman para conformidade ABNT NBR 14724
+\usepackage{mathptmx}
+
+% Pacotes para tabelas de alta densidade e tipografia de precisão
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{siunitx}
+\usepackage[protrusion=true,expansion=false]{microtype}
+
+% Configuração do caminho de figuras
+\graphicspath{{./04-figuras/}{./figuras/}{./}}
+
+% --------------------------------------------------------------------------
+% Configuração do siunitx (ABNT: vírgula decimal e notação científica)
+% --------------------------------------------------------------------------
+\sisetup{
+  output-decimal-marker = {,},
+  group-separator       = {.},
+  group-minimum-digits  = 4,
+  per-mode              = symbol,
+  range-phrase          = {~a~},
+  range-units           = repeat,
+  exponent-product      = \times,
+}
+
+% Unidades aeroespaciais e dinâmicas customizadas
+\DeclareSIUnit\Grms{\ensuremath{\mathrm{G_{rms}}}}
+\DeclareSIUnit\gacc{\ensuremath{\mathrm{g}}}
+\DeclareSIUnit\gravity{\ensuremath{\mathrm{G}}}
+\DeclareSIUnit\Gacc{\ensuremath{\mathrm{G}}}
+\DeclareSIUnit\octave{oitava}
+\DeclareSIUnit\torr{Torr}
+
+% --------------------------------------------------------------------------
+% Macros de domínio e computacionais
+% --------------------------------------------------------------------------
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\pendente}[1]{\textbf{\textcolor{red!80!black}{[PENDENTE: #1]}}}
+\newcommand{\ph}[1]{\textcolor{red!60!black}{\textit{[#1]}}}
+\newcommand{\rail}{\num{8.5}\,$\times$\,\num{8.5}~\si{\milli\metre}}
+\newcommand{\figplaceholder}{\fbox{\rule{0pt}{5cm}\rule{0.8\textwidth}{0pt}}}
+\newcommand{\Grmsbase}{G_{\text{rms, base}}}
+\newcommand{\Grmspay}{G_{\text{rms, payload}}}
+
+% Redefinição robusta de notas para evitar estouro de margem tabular
+\renewcommand{\nota}[1]{%
+  \par\vspace{0.2cm}%
+  \noindent{\footnotesize\textbf{Nota:} #1\par}%
+}
+
+% --------------------------------------------------------------------------
+% Calibração de profundidade de numeração e Sumário (ABNT NBR 6024)
+% Garante hierarquia canônica até subsubseção (nível 4) sem índices quebrados
+% --------------------------------------------------------------------------
+\setcounter{secnumdepth}{3}
+\settocdepth{subsubsection}
+\setcounter{tocdepth}{3}
+\sloppy

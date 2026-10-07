@@ -1,0 +1,60 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%            TEMPLATE DE TCC / MONOGRAFIA UESC      %
+%       Adequação ao modelo PPGMC/UESC (v5.0)       %
+%     Autor: Gabriel Marques de Andrade (2026)      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[oneside]{pacotes/ppgmc-uesc}
+
+% Pacotes adicionais, configurações do siunitx e macros do projeto CubeSat
+\input{./pacotes/macros-cubesat}
+
+% Informações de autoria, instituição, título e orientação
+\input{./01-elementos-pre-textuais/1-Inf.Capa-FolhaRosto}
+
+% ==========================================================================
+% INÍCIO DO DOCUMENTO
+% ==========================================================================
+\begin{document}
+\pretextual
+\frenchspacing
+
+% Elementos pré-textuais
+\imprimircapa                     % Capa institucional
+\imprimirfolhaderosto{}           % Folha de rosto
+\include{./01-elementos-pre-textuais/FolhaAprovacao} % Folha de aprovação
+\include{./01-elementos-pre-textuais/dedicatoria}    % Dedicatória
+\include{./01-elementos-pre-textuais/agradecimentos} % Agradecimentos
+\include{./01-elementos-pre-textuais/epigrafe}       % Epígrafe
+\include{./01-elementos-pre-textuais/resumoPt}       % Resumo em Português
+\include{./01-elementos-pre-textuais/resumoEn}       % Abstract em Inglês
+\include{./01-elementos-pre-textuais/listaFiguras}   % Lista de figuras
+\include{./01-elementos-pre-textuais/listaTabelas}   % Lista de tabelas
+\include{./01-elementos-pre-textuais/listaSiglas}    % Lista de siglas
+\include{./01-elementos-pre-textuais/listaSimbolos}  % Lista de símbolos
+\include{./01-elementos-pre-textuais/sumario}        % Sumário
+
+% ==========================================================================
+% ELEMENTOS TEXTUAIS
+% ==========================================================================
+\textual
+
+\include{./02-elementos-textuais/cap1-introducao}
+\include{./02-elementos-textuais/cap2-objetivos}
+\include{./02-elementos-textuais/cap3-revisao_literatura}
+\include{./02-elementos-textuais/cap4-metodologia}
+\include{./02-elementos-textuais/cap5-resultados_discussao}
+\include{./02-elementos-textuais/cap6-conclusao}
+
+% ==========================================================================
+% ELEMENTOS PÓS-TEXTUAIS
+% ==========================================================================
+\postextual
+
+% Referências bibliográficas (NBR 6023)
+\input{./03-elementos-pos-textuais/referencias}
+
+% Caso deseje compilar via BibTeX no Overleaf com refbase.bib:
+% \nocite{*}
+% \bibliography{./03-elementos-pos-textuais/refbase}
+
+\end{document}
