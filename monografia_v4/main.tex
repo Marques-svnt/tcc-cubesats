@@ -1,0 +1,60 @@
+% ==========================================================================
+% main.tex (e Monografia-v3.tex)
+% CubeSat em Baixa Órbita: Otimização de Volume e Geometria para
+% Maximização de Desempenho Estrutural e Funcional
+% Autor: Gabriel Marques de Andrade -- UESC (2026)
+%
+% Estrutura Modular ABNT (NBR 14724, NBR 6023, NBR 10520 e NBR 6028).
+% Compilação: pdflatex main.tex (duas passagens).
+% ==========================================================================
+\documentclass[12pt,a4paper,oneside,chapter=TITLE,section=TITLE,english,brazil]{abntex2}
+
+% Configurações, Pacotes e Macros
+\input{config/pacotes}
+\input{config/comandos}
+
+\begin{document}
+
+% --------------------------------------------------------------------------
+% ELEMENTOS PRÉ-TEXTUAIS
+% --------------------------------------------------------------------------
+\frenchspacing
+\pretextual
+
+\input{pretextual/00_capa_folharosto}
+\input{pretextual/01_resumo}
+\input{pretextual/02_abstract}
+
+% Listas e Sumário
+\pdfbookmark[0]{\listfigurename}{lof}
+\listoffigures*
+\cleardoublepage
+
+\pdfbookmark[0]{\listtablename}{lot}
+\listoftables*
+\cleardoublepage
+
+\pdfbookmark[0]{\contentsname}{toc}
+\tableofcontents*
+\cleardoublepage
+
+% --------------------------------------------------------------------------
+% ELEMENTOS TEXTUAIS
+% --------------------------------------------------------------------------
+\textual
+
+\input{capitulos/01_introducao}
+\input{capitulos/02_objetivos}
+\input{capitulos/03_revisao_literatura}
+\input{capitulos/04_metodologia}
+\input{capitulos/05_resultados_discussao}
+\input{capitulos/06_conclusao}
+
+% --------------------------------------------------------------------------
+% ELEMENTOS PÓS-TEXTUAIS
+% --------------------------------------------------------------------------
+\postextual
+
+\input{postextual/referencias}
+
+\end{document}
