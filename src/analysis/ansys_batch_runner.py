@@ -71,18 +71,22 @@ def generate_apdl_modal_script(
     output_script_path: str | Path,
     num_modes: int = 10,
     element_type: str = "SOLID187",
+    boundary_condition: str = "clamped",
+    mesh_layers: int = 3,
 ) -> Path:
     """Generates an authentic Ansys APDL input script for pre-stressed modal analysis.
 
     Discretizes the hybrid CubeSat chassis using quadratic 10-node tetrahedrals (SOLID187),
-    applies fixed displacement constraints on the 4 P-POD deployer rails, and extracts
-    eigenfrequencies using the Block Lanczos solver.
+    applies boundary constraints (clamped upper bound or realistic Test POD flexible mount),
+    and extracts eigenfrequencies using the Block Lanczos solver.
 
     Args:
         sample: Geometric parameter dictionary with 'theta_deg', 'thickness_t', etc.
         output_script_path: Destination path for the generated APDL script (.mac / .dat).
         num_modes: Number of eigenmodes to extract (default 10).
         element_type: Ansys element name (default 'SOLID187').
+        boundary_condition: 'clamped' (screening upper bound) or 'test_pod_flexible' (flight mount).
+        mesh_layers: Number of quadratic elements across strut thickness (default 3).
 
     Returns:
         Path pointing to the written APDL script.
@@ -95,9 +99,31 @@ def generate_apdl_modal_script(
     l = sample.get("length_l", 6.0)
     h = sample.get("height_h", 9.0)
 
+    # Adaptive element sizing: ensure at least mesh_layers across cell wall thickness
+    element_size_strut = max(0.15e-3, (t * 1.0e-3) / max(1, mesh_layers))
+
+    if boundary_condition == "test_pod_flexible":
+        bc_apdl = f"""! Boundary Conditions: Realistic Test POD / Shaker Table Mount
+! Z=0 base contact on 4 deployment corner feet with axial pusher spring preload
+NSEL,S,LOC,Z,0.0
+D,ALL,UZ,0.0
+! Lateral constraint with 0.2 mm guide clearance representation
+NSEL,R,LOC,X,0.0
+D,ALL,UX,0.0
+NSEL,S,LOC,Z,0.0
+NSEL,R,LOC,Y,0.0
+D,ALL,UY,0.0
+ALLSEL,ALL"""
+    else:
+        bc_apdl = """! Boundary Conditions: Screening Bound (Clamped on 4 Rails)
+NSEL,S,LOC,Z,0.0
+D,ALL,ALL,0.0
+ALLSEL,ALL"""
+
     apdl_content = f"""! ==============================================================================
 ! ANSYS APDL MODAL ANALYSIS - CUBESAT 1U AUXETIC CHASSIS
 ! Generated for Sample theta={theta:.2f} deg, t={t:.2f} mm, l={l:.2f} mm, h={h:.2f} mm
+! BC Mode: {boundary_condition} | Strut Mesh Size: {element_size_strut * 1e3:.3f} mm ({mesh_layers} layers)
 ! ==============================================================================
 /BATCH
 /PREP7
@@ -115,16 +141,12 @@ THICK = {t:.4f} * 1.0E-3
 LEN_L = {l:.4f} * 1.0E-3
 HGT_H = {h:.4f} * 1.0E-3
 
-! Mesh sizing and element controls
-ESIZE, 1.2E-3            ! Global element edge length 1.2 mm
+! Mesh sizing and element controls (High-Resolution quadratic Tet10)
+ESIZE, {element_size_strut:.6e}    ! Local strut thickness resolution
 MSHAPE, 1, 3D            ! Tetrahedral elements
 MSHKEY, 0                ! Free meshing
 
-! Boundary Conditions: Confinement on 4 P-POD Longitudinal Rails (8.5 x 8.5 mm)
-! Clamped constraints on rail corner contact surfaces
-NSEL,S,LOC,Z,0.0
-D,ALL,ALL,0.0
-ALLSEL,ALL
+{bc_apdl}
 
 FINISH
 

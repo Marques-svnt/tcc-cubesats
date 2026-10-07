@@ -1,0 +1,77 @@
+[
+  {
+    "candidate_id": "OpenCand_001",
+    "theta_deg": 75.32398699793377,
+    "thickness_t": 1.6964938708624864,
+    "length_l": 8.741596048465162,
+    "height_h": 13.330242596481995,
+    "relative_density": 0.5416958676929509,
+    "is_dfam_valid": true,
+    "has_phononic_bandgap": true,
+    "first_natural_freq_hz": 282.5,
+    "peak_3sigma_stress_mpa": 79.22505996447603,
+    "payload_grms": 1.692,
+    "transmissibility_ratio": 0.12,
+    "margin_of_safety_yield": 1.3224974532364424,
+    "fatigue_damage_steinberg": 0.0001405493499927749,
+    "payload_max_srs_g": 50.76,
+    "is_gevs_qualified": true,
+    "is_fully_qualified": true,
+    "audit_notes": [
+      "Passed DfAM LPBF manufacturability gate.",
+      "Bloch-Floquet bandgap confirmed: 4 acoustic gaps detected.",
+      "Shock SRS peak: 50.8 G (limit: 80.0 G).",
+      "Candidate FULLY QUALIFIED for flight under NASA GSFC-STD-7000A."
+    ]
+  },
+  {
+    "candidate_id": "OpenCand_002",
+    "theta_deg": 70.48831599926152,
+    "thickness_t": 0.8406278656200133,
+    "length_l": 5.853529977697203,
+    "height_h": 6.681716165354331,
+    "relative_density": 0.32406772551630586,
+    "is_dfam_valid": true,
+    "has_phononic_bandgap": true,
+    "first_natural_freq_hz": 298.17,
+    "peak_3sigma_stress_mpa": 105.17639824294642,
+    "payload_grms": 2.2462395851370855,
+    "transmissibility_ratio": 0.15930777199553797,
+    "margin_of_safety_yield": 0.7494419192315309,
+    "fatigue_damage_steinberg": 0.0010187162069850318,
+    "payload_max_srs_g": 50.76,
+    "is_gevs_qualified": true,
+    "is_fully_qualified": true,
+    "audit_notes": [
+      "Passed DfAM LPBF manufacturability gate.",
+      "Bloch-Floquet bandgap confirmed: 4 acoustic gaps detected.",
+      "Shock SRS peak: 50.8 G (limit: 80.0 G).",
+      "Candidate FULLY QUALIFIED for flight under NASA GSFC-STD-7000A."
+    ]
+  },
+  {
+    "candidate_id": "OpenCand_003",
+    "theta_deg": 60.81140024216137,
+    "thickness_t": 0.9888492408260698,
+    "length_l": 7.287730240161329,
+    "height_h": 10.663754361047506,
+    "relative_density": 0.20621899105207103,
+    "is_dfam_valid": true,
+    "has_phononic_bandgap": true,
+    "first_natural_freq_hz": 309.12,
+    "peak_3sigma_stress_mpa": 112.40542572416088,
+    "payload_grms": 2.4006290485682196,
+    "transmissibility_ratio": 0.1702573793310794,
+    "margin_of_safety_yield": 0.6369316588998986,
+    "fatigue_damage_steinberg": 0.0016596841326983539,
+    "payload_max_srs_g": 50.76,
+    "is_gevs_qualified": true,
+    "is_fully_qualified": true,
+    "audit_notes": [
+      "Passed DfAM LPBF manufacturability gate.",
+      "Bloch-Floquet bandgap confirmed: 4 acoustic gaps detected.",
+      "Shock SRS peak: 50.8 G (limit: 80.0 G).",
+      "Candidate FULLY QUALIFIED for flight under NASA GSFC-STD-7000A."
+    ]
+  }
+]

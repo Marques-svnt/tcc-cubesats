@@ -79,6 +79,8 @@ file.*
 *.tar.gz
 *.7z
 Referencial-*.zip
+archive/
+docs/referencias/
 
 # --- Saídas Temporárias e Scratch de Agentes ---
 scratch/
@@ -91,6 +93,7 @@ logs/*.log
 *.toc
 *.lof
 *.lot
+*.loq
 *.nav
 *.snm
 *.vrb

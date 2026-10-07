@@ -27,6 +27,12 @@ from src.analysis.auxetic_analytics import (
     calculate_gibson_ashby_properties as calc_ga_props,
     calculate_steinberg_random_fatigue as calc_steinberg_fatigue,
 )
+from src.analysis.bloch_floquet import BlochFloquetAnalyzer
+from src.analysis.code_aster_runner import CodeAsterRunner
+from src.analysis.openradioss_shock_runner import OpenRadiossShockRunner
+from src.cad.cadquery_engine import OpenCadEngine
+from src.mesh.gmsh_engine import GmshMeshGenerator
+from src.pipeline.open_orchestrator import OpenSourceQualificationPipeline
 
 logger = logging.getLogger("cubesat_mcp")
 
@@ -271,6 +277,211 @@ def calculate_steinberg_random_fatigue(
         duration_seconds=duration_seconds,
         dominant_freq_hz=dominant_freq_hz,
     )
+
+
+# Global instances of Open Source engines
+_open_cad_engine = OpenCadEngine()
+_gmsh_generator = GmshMeshGenerator()
+_code_aster_runner = CodeAsterRunner()
+_bloch_analyzer = BlochFloquetAnalyzer()
+_shock_runner = OpenRadiossShockRunner()
+_open_pipeline = OpenSourceQualificationPipeline()
+
+
+@mcp.tool()
+def generate_open_cad_step(
+    theta_deg: float = 65.75,
+    thickness_t: float = 0.613,
+    length_l: float = 6.0,
+    height_h: float = 9.0,
+    export_step_path: str = "data/cad_models/cubesat_open.step",
+) -> Dict[str, Any]:
+    """Generates open-source parametric CAD model (STEP AP214) with LPBF DfAM verification.
+
+    Args:
+        theta_deg: Re-entrant cell angle in degrees.
+        thickness_t: Strut thickness in mm.
+        length_l: Inclined strut length in mm.
+        height_h: Vertical strut height in mm.
+        export_step_path: Destination path for STEP AP214 file.
+
+    Returns:
+        Dictionary with DfAM validation, file path, and relative density.
+    """
+    dfam_rep = _open_cad_engine.validate_lpbf_dfam(
+        theta_deg=theta_deg,
+        thickness_t=thickness_t,
+        length_l=length_l,
+        height_h=height_h,
+    )
+    step_file = _open_cad_engine.export_step_model(
+        theta_deg=theta_deg,
+        thickness_t=thickness_t,
+        length_l=length_l,
+        height_h=height_h,
+        output_step_path=export_step_path,
+    )
+    return {
+        "status": "success",
+        "step_path": str(step_file),
+        "is_dfam_compliant": dfam_rep.is_compliant,
+        "relative_density": dfam_rep.relative_density,
+        "estimated_mass_kg": dfam_rep.estimated_mass_kg,
+        "dfam_warnings": dfam_rep.warnings,
+        "dfam_failures": dfam_rep.failure_reasons,
+    }
+
+
+@mcp.tool()
+def generate_gmsh_tet10_mesh(
+    theta_deg: float = 65.75,
+    thickness_t: float = 0.613,
+    length_l: float = 6.0,
+    height_h: float = 9.0,
+    output_msh_path: str = "data/meshes/cubesat_tet10.msh",
+    mesh_layers: int = 3,
+) -> Dict[str, Any]:
+    """Generates quadratic Tet10 mesh with strut thickness resolution (>=3 elements) and notch control.
+
+    Args:
+        theta_deg: Re-entrant cell angle in degrees.
+        thickness_t: Strut thickness in mm.
+        length_l: Inclined strut length in mm.
+        height_h: Vertical strut height in mm.
+        output_msh_path: Destination path for .msh file.
+        mesh_layers: Number of quadratic elements across strut thickness.
+
+    Returns:
+        Dictionary with mesh statistics (nodes, Tet10 count) and convergence report.
+    """
+    msh_file, report = _gmsh_generator.generate_msh_file(
+        theta_deg=theta_deg,
+        thickness_t=thickness_t,
+        length_l=length_l,
+        height_h=height_h,
+        output_msh_path=output_msh_path,
+        mesh_layers=mesh_layers,
+    )
+    return {
+        "status": "success",
+        "msh_path": str(msh_file),
+        "mesh_quality": report.to_dict(),
+    }
+
+
+@mcp.tool()
+def run_code_aster_qualification(
+    theta_deg: float = 65.75,
+    thickness_t: float = 0.613,
+    length_l: float = 6.0,
+    height_h: float = 9.0,
+    boundary_condition: str = "test_pod_flexible",
+    mesh_layers: int = 3,
+) -> Dict[str, Any]:
+    """Runs open-source modal and random vibration qualification (Code_Aster .comm / Open Kernel).
+
+    Args:
+        theta_deg: Re-entrant cell angle in degrees.
+        thickness_t: Strut thickness in mm.
+        length_l: Inclined strut length in mm.
+        height_h: Vertical strut height in mm.
+        boundary_condition: 'clamped' or 'test_pod_flexible'.
+        mesh_layers: Elements across thickness.
+
+    Returns:
+        Dictionary with modal frequencies, 3-sigma stress, Margin of Safety, and Steinberg damage.
+    """
+    res = _code_aster_runner.run_qualification(
+        theta_deg=theta_deg,
+        thickness_t=thickness_t,
+        length_l=length_l,
+        height_h=height_h,
+        boundary_condition=boundary_condition,
+        mesh_layers=mesh_layers,
+    )
+    return res.to_dict()
+
+
+@mcp.tool()
+def calculate_bloch_floquet_dispersion(
+    theta_deg: float = 65.75,
+    thickness_t: float = 0.613,
+    length_l: float = 6.0,
+    height_h: float = 9.0,
+) -> Dict[str, Any]:
+    """Solves Bloch-Floquet dispersion across First Brillouin Zone to identify acoustic bandgaps.
+
+    Args:
+        theta_deg: Re-entrant angle in degrees.
+        thickness_t: Strut thickness in mm.
+        length_l: Inclined strut length in mm.
+        height_h: Vertical strut height in mm.
+
+    Returns:
+        Dictionary with identified phononic bandgaps and target launch band coverage.
+    """
+    disp = _bloch_analyzer.compute_dispersion_relation(
+        theta_deg=theta_deg,
+        thickness_t=thickness_t,
+        length_l=length_l,
+        height_h=height_h,
+    )
+    return disp.to_dict()
+
+
+@mcp.tool()
+def simulate_p_pod_ejection_shock_srs(
+    cubesat_mass_kg: float = 1.330,
+    spring_preload_n: float = 55.60,
+    spring_k_n_m: float = 556.0,
+    stroke_length_m: float = 0.100,
+) -> Dict[str, Any]:
+    """Simulates transient P-POD mechanical separation shock and computes SRS (Q=10).
+
+    Args:
+        cubesat_mass_kg: Total satellite mass in kg.
+        spring_preload_n: Initial spring preload force in N.
+        spring_k_n_m: Spring stiffness in N/m.
+        stroke_length_m: Deployer stroke in meters.
+
+    Returns:
+        Dictionary with ejection velocity, peak shock, and SRS qualification status.
+    """
+    shock_res = _shock_runner.solve_separation_shock(
+        cubesat_mass_kg=cubesat_mass_kg,
+        spring_preload_n=spring_preload_n,
+        spring_k_n_m=spring_k_n_m,
+        stroke_length_m=stroke_length_m,
+    )
+    return shock_res.to_dict()
+
+
+@mcp.tool()
+def run_open_source_pipeline(
+    num_samples: int = 10,
+    boundary_condition: str = "test_pod_flexible",
+) -> Dict[str, Any]:
+    """Executes the full open-source screening and aerospace qualification pipeline.
+
+    Args:
+        num_samples: Number of Latin Hypercube design points to evaluate.
+        boundary_condition: 'clamped' or 'test_pod_flexible'.
+
+    Returns:
+        Dictionary with execution summary, pass rate, and compliant candidates.
+    """
+    results = _open_pipeline.run_pipeline(
+        num_samples=num_samples,
+        boundary_condition=boundary_condition,
+    )
+    qualified = [r.to_dict() for r in results if r.is_fully_qualified]
+    return {
+        "status": "success",
+        "total_evaluated": len(results),
+        "total_qualified": len(qualified),
+        "qualification_rate_percent": (len(qualified) / max(len(results), 1)) * 100.0,
+        "qualified_candidates": qualified,
+    }
 
 
 if __name__ == "__main__":

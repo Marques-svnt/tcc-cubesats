@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cubesat-auxetic-optimization"
+version = "3.0.0"
+description = "1U CubeSat Auxetic Cellular Chassis Optimization & NASA GEVS Qualification (100% Open-Source Stack)"
+authors = [
+    { name = "Gabriel Marques de Andrade", email = "marques.gabriel@uesc.br" }
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=1.26.0",
+    "scipy>=1.12.0",
+    "matplotlib>=3.8.0",
+    "torch>=2.2.0",
+    "sympy>=1.12.0",
+]
+
+[project.optional-dependencies]
+open_hpc = [
+    "gmsh>=4.12.0",
+    "prefect>=2.16.0",
+    "pyvista>=0.43.0",
+]
+test = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --strict-markers"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4"]
+ignore = ["E501"]

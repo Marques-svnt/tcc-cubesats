@@ -1,0 +1,86 @@
+solid auxetic_unit_cell_flight28
+  facet normal 1.000000e+00 0.000000e+00 0.000000e+00
+    outer loop
+      vertex -0.3065 -6.9800 -4.0000
+      vertex -0.3065 6.9800 -4.0000
+      vertex -0.3065 6.9800 4.0000
+    endloop
+  endfacet
+  facet normal 1.000000e+00 0.000000e+00 0.000000e+00
+    outer loop
+      vertex -0.3065 -6.9800 -4.0000
+      vertex -0.3065 6.9800 4.0000
+      vertex -0.3065 -6.9800 4.0000
+    endloop
+  endfacet
+  facet normal -9.117620e-01 -4.107189e-01 0.000000e+00
+    outer loop
+      vertex -0.3065 6.9800 -4.0000
+      vertex 3.1846 -0.7700 -4.0000
+      vertex 3.1846 -0.7700 4.0000
+    endloop
+  endfacet
+  facet normal -9.117620e-01 -4.107189e-01 0.000000e+00
+    outer loop
+      vertex -0.3065 6.9800 -4.0000
+      vertex 3.1846 -0.7700 4.0000
+      vertex -0.3065 6.9800 4.0000
+    endloop
+  endfacet
+  facet normal 1.000000e+00 0.000000e+00 0.000000e+00
+    outer loop
+      vertex 3.1846 -0.7700 -4.0000
+      vertex 3.1846 0.7700 -4.0000
+      vertex 3.1846 0.7700 4.0000
+    endloop
+  endfacet
+  facet normal 1.000000e+00 0.000000e+00 0.000000e+00
+    outer loop
+      vertex 3.1846 -0.7700 -4.0000
+      vertex 3.1846 0.7700 4.0000
+      vertex 3.1846 -0.7700 4.0000
+    endloop
+  endfacet
+  facet normal -9.117620e-01 4.107189e-01 0.000000e+00
+    outer loop
+      vertex 3.1846 0.7700 -4.0000
+      vertex -0.3065 -6.9800 -4.0000
+      vertex -0.3065 -6.9800 4.0000
+    endloop
+  endfacet
+  facet normal -9.117620e-01 4.107189e-01 0.000000e+00
+    outer loop
+      vertex 3.1846 0.7700 -4.0000
+      vertex -0.3065 -6.9800 4.0000
+      vertex 3.1846 0.7700 4.0000
+    endloop
+  endfacet
+  facet normal 0.000000e+00 0.000000e+00 -1.000000e+00
+    outer loop
+      vertex -0.3065 -6.9800 4.0000
+      vertex -0.3065 6.9800 4.0000
+      vertex 3.1846 -0.7700 4.0000
+    endloop
+  endfacet
+  facet normal 0.000000e+00 0.000000e+00 -1.000000e+00
+    outer loop
+      vertex -0.3065 -6.9800 4.0000
+      vertex 3.1846 -0.7700 4.0000
+      vertex 3.1846 0.7700 4.0000
+    endloop
+  endfacet
+  facet normal -0.000000e+00 -0.000000e+00 -1.000000e+00
+    outer loop
+      vertex 3.1846 0.7700 -4.0000
+      vertex 3.1846 -0.7700 -4.0000
+      vertex -0.3065 6.9800 -4.0000
+    endloop
+  endfacet
+  facet normal -0.000000e+00 -0.000000e+00 -1.000000e+00
+    outer loop
+      vertex 3.1846 0.7700 -4.0000
+      vertex -0.3065 6.9800 -4.0000
+      vertex -0.3065 -6.9800 -4.0000
+    endloop
+  endfacet
+endsolid auxetic_unit_cell_flight28
