@@ -1,0 +1,4 @@
+# Overleaf / latexmk configuration file for fast, reliable compilation
+$pdf_mode = 1;
+$max_repeat = 3;
+$pdflatex = 'pdflatex -interaction=nonstopmode -synctex=1 %O %S';

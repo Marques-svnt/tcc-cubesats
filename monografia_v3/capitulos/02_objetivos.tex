@@ -1,0 +1,25 @@
+\chapter{Objetivos}
+\label{cap:objetivos}
+% --------------------------------------------------------------------------
+
+\section{Objetivo geral}
+\label{sec:objetivo-geral}
+
+Desenvolver, validar e qualificar computacionalmente um arcabouço autônomo de otimização volumétrica e geométrica de metamateriais auxéticos aplicados ao chassi primário de nanossatélites CubeSat 1U em liga aeroespacial AlSi10Mg fabricado por Fusão em Leito de Pó a Laser (L-PBF), integrando Simulação em Elementos Finitos de Alta Fidelidade (FEA), Modelos Substitutos Neurais Guiados por Física (\textit{Physics-Guided Machine Learning}) e Grafos de Fluxo Determinísticos de Engenharia de Sistemas, com vistas a maximizar a atenuação elastodinâmica passiva sob o envelope normativo da norma NASA GSFC-STD-7000A (GEVS) e minimizar a massa estrutural.
+
+\section{Objetivos específicos}
+\label{sec:objetivos-especificos}
+
+Para atingir o objetivo geral, definem-se os seguintes objetivos específicos:
+
+\begin{alineas}
+  \item parametrizar geometricamente a célula unitária auxética reentrante tridimensional e os painéis estruturais do chassi 1U, preservando a continuidade dos quatro trilhos-guia maciços de \rail{} com rugosidade superficial $Ra \le \SI{1.6}{\micro\metre}$, de modo a assegurar o correto acoplamento cinemático e evitar travamento mecânico durante a ejeção no dispensador P-POD;
+  \item formalizar e implementar as restrições normativas de Manufatura Aditiva Metálica (DfAM para L-PBF em AlSi10Mg), englobando o ângulo de inclinação autossustentado ($\theta_{\text{overhang}} \ge \SI{35.0}{\degree}$, com diretriz recomendada de $\SI{45.0}{\degree}$), a espessura mínima de parede ($t \ge \SI{0.50}{\milli\metre}$), canais livres de despoeiramento ($\ge \SI{1.50}{\milli\metre}$) e furos de evacuação de pó residual não fundido ($\phi \ge \SI{2.0}{\milli\metre}$);
+  \item estruturar uma campanha de amostragem no espaço de variáveis geométricas $[\theta, t, l, h]^\top$ por Hipercubo Latino (\textit{Latin Hypercube Sampling} -- LHS), com 250 pontos parametrizados e filtrados por critérios de viabilidade geométrica e física;
+  \item automatizar rotinas de Elementos Finitos (Ansys MAPDL) para execução em lote (\textit{batch}) de análises modais pré-tensionadas e de resposta à vibração aleatória espectral (PSD), avaliando as condições de contorno de lançamento e o perfil de qualificação da NASA GSFC-STD-7000A (\SI{14.1}{\Grms}, \SIrange{20}{2000}{\hertz});
+  \item formular, calibrar e treinar uma rede neural com blocos residuais (\textit{Physics-Guided ResNet}), empregando função de perda composta com termos de regularização fenomenológica de Gibson-Ashby e penalização de violações de monotonicidade de rigidez elástica;
+  \item construir e instanciar um grafo de estados determinístico de engenharia de sistemas (LangGraph \code{StateGraph}), com contratos de dados imutáveis fortemente tipados (\code{CubeSatState}) e nós especializados para portão DfAM, predição neural substituta e qualificação normativa espacial com rastreabilidade auditável;
+  \item acoplar o algoritmo genético evolutivo NSGA-II ao orquestrador computacional para mapear a fronteira de Pareto multiobjetivo entre massa do chassi e transmissibilidade dinâmica na interface da carga útil, sob restrições ativas de rigidez ($f_1 \ge \SI{100.0}{\hertz}$), escoamento estático ($MS_{\text{yield}} > 0$) e tolerância à fadiga aleatória de Steinberg ($D \le \num{0.25}$);
+  \item selecionar a geometria ótima de voo pelo método de tomada de decisão multicritério TOPSIS e submetê-la à validação cruzada física de alta ordem (\textit{FEA Ground Truth}), conduzindo estudo de convergência de malha de segunda ordem (\code{SOLID187}) na mesoestrutura e quantificando os desvios de predição;
+  \item analisar comparativamente o desempenho aeroespacial do chassi auxético ótimo frente ao chassi monolítico convencional de referência em Al 6061-T6, comprovando quantitativamente os ganhos em redução de massa, atenuação de aceleração RMS e rigidez dinâmica.
+\end{alineas}
