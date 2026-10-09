@@ -84,6 +84,6 @@ Tratamento térmico de alívio de tensões: 2 horas a $300^\circ\text{C}$.
 
 ## 7. Modelo Substituto Neural (*Physics-Guided ResNet*)
 - **Arquitetura:** Rede residual com blocos skip connection e regularização física baseada nas equações de escala de Gibson-Ashby.
-- **Dataset:** 250 simulações de alta ordem (Ansys MAPDL) orquestradas via LangGraph determinístico.
+- **Dataset:** 250 simulações de alta ordem (Code\_Aster e Gmsh Tet10 em Linux/WSL) orquestradas via LangGraph determinístico.
 - **Métricas:** $\overline{R^2} = 0{,}9874$, RMSE $= 0{,}0182$.
 - **Tempo de inferência:** $0{,}405\text{ ms}$ (aceleração $> 200.000\times$ em relação ao ciclo FEA completo de $\sim 92\text{ s}$).

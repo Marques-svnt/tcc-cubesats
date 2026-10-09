@@ -2,19 +2,19 @@
 \label{cap:metodologia}
 % --------------------------------------------------------------------------
 
-Este capítulo detalha o rigor metodológico aplicado ao desenvolvimento, à aceleração neural e à validação do chassi primário auxético para nanossatélites CubeSat 1U. A pesquisa estrutura-se sobre uma abordagem híbrida que combina o princípio da similaridade mecânica, ensaios de caracterização experimental com material polimérico análogo, modelagem multiescala por elementos de volume representativo (RVE) e simulações computacionais de alta fidelidade em elementos finitos (Ansys MAPDL). O fluxo operacional está dividido em quatro fases sequenciais: (i) caracterização constitutiva e calibração numérica; (ii) modelagem implícita e homogeneização assintótica; (iii) simulação dinâmica normatizada e síntese do modelo substituto neural guiado por física (\textit{Physics-Guided ResNet}); e (iv) validação cruzada por similaridade e integridade à fadiga estocástica.
+Este capítulo detalha o rigor metodológico aplicado ao desenvolvimento, à aceleração neural e à validação do chassi primário auxético para nanossatélites CubeSat 1U. A pesquisa estrutura-se sobre uma abordagem computacional integrada que combina a análise dimensional celular, a modelagem multiescala por elementos de volume representativo (RVE), a síntese paramétrica B-Rep com restrições de Manufatura Aditiva (DfAM) e simulações elastodinâmicas de alta fidelidade em elementos finitos no ecossistema aberto (Code\_Aster e Gmsh Tet10 em ambiente Linux/WSL). O fluxo operacional está dividido em quatro fases sequenciais: (i) ancoragem constitutiva direta na liga aeroespacial AlSi10Mg e parametrização geométrica; (ii) modelagem de contorno e homogeneização assintótica; (iii) simulação dinâmica normatizada em código aberto e síntese do modelo substituto neural guiado por física (\textit{Physics-Guided ResNet}); e (iv) validação de alta ordem (\textit{Code\_Aster Ground Truth}) e integridade à fadiga estocástica.
 
 \section{Princípio de similaridade mecânica, análise dimensional e limites de transferibilidade}
 \label{sec:similaridade}
 
-A transposição das respostas dinâmicas e o emprego inicial do Poliácido Láctico (PLA) como material análogo fundamentam-se na Teoria da Similaridade Mecânica e na análise dimensional governada pelo Teorema Pi de Buckingham (NASA, 2016). Esse princípio estabelece que dois sistemas físicos são cinematicamente e dinamicamente semelhantes quando as razões entre forças correspondentes e entre dimensões características permanecem invariantes entre o modelo em escala/análogo e o protótipo real de voo, permitindo transferir calibrações numéricas preliminares entre materiais distintos.
+A formulação teórica de escala para metamateriais celulares fundamenta-se na Teoria da Similaridade Mecânica e na análise dimensional governada pelo Teorema Pi de Buckingham (NASA, 2016). Esse princípio estabelece que sistemas físicos governados pelos mesmos fenômenos constitutivos preservam relações dinâmicas invariantes quando os grupos adimensionais característicos são estritamente conservados.
 
 No domínio dos metamateriais celulares e estruturas treliçadas, a variável adimensional governante primária é a densidade relativa ($\rho^{*}/\rho_s$), que define a fração de volume ocupada pelo material sólido e dita a rigidez elástica equivalente ($E^{*}/E_s$). De acordo com as leis fundamentais de Gibson e Ashby (1997), a relação constitutiva macroscópica para matrizes celulares dominadas por flexão é regida pela lei de potência formulada na Equação~\eqref{eq:pi1}:
 \begin{equation}
   \Pi_1 = \frac{E^{*}}{E_s} = C \left( \frac{\rho^{*}}{\rho_s} \right)^{n}
   \label{eq:pi1}
 \end{equation}
-Como este trabalho impõe estrita invariância topológica para a célula unitária reentrante entre a fase de validação polimérica e o chassi metálico aeroespacial definitivo, os coeficientes adimensionais $C$ e $n$ são estritamente conservados na escala geométrica macroscópica.
+na qual $C$ e $n$ são constantes topológicas puras associadas à cinemática de deformação da célula unitária reentrante.
 
 Para o comportamento elastodinâmico e o desacoplamento ressonante no veículo lançador, a formulação dimensional define o segundo grupo adimensional ($\Pi_2$), correlacionando a frequência natural fundamental ($f_n$), a dimensão característica macroscópica ($L$) e as propriedades mecânicas eficazes:
 \begin{equation}
@@ -22,61 +22,62 @@ Para o comportamento elastodinâmico e o desacoplamento ressonante no veículo l
   \label{eq:fn}
 \end{equation}
 
-Contudo, sob o rigor da engenharia aeroespacial e da qualificação estrutural, é fundamental explicitar os limites de validade física dessa abordagem dimensional. Embora a similaridade elástica linear clássica governada por $\Pi_1$ e $\Pi_2$ forneça uma aproximação consistente para deformações estáticas e autovalores modais não amortecidos em materiais homotéticos, ela configura uma \textbf{similaridade incompleta (\textit{incomplete similarity})} quando estendida à dinâmica estocástica de vibração aleatória e à integridade em fadiga. Existem divergências constitutivas determinantes entre os dois domínios materiais:
+Contudo, sob o rigor estrito da qualificação estrutural aeroespacial, é imperativo explicitar os limites físicos de validade dessa abordagem dimensional. Embora a similaridade elástica linear clássica governada por $\Pi_1$ e $\Pi_2$ forneça correlações consistentes para deformações estáticas e autovalores modais teóricos não amortecidos em meios homotéticos, ela configura uma \textbf{similaridade incompleta (\textit{incomplete similarity})} quando estendida à dinâmica estocástica de vibração aleatória e à integridade em fadiga. Existem divergências constitutivas intransponíveis entre domínios poliméricos (como termoplásticos impressos por FDM) e ligas metálicas aeroespaciais:
 \begin{alineas}
-  \item \textbf{amortecimento e dissipação interna de energia:} polímeros manufaturados por FDM exibem comportamento viscoelástico com pronunciado amortecimento interno dependente da taxa de deformação e temperatura ($\zeta_{\text{PLA}} \approx \num{0.03}$ a $\num{0.06}$, ou seja, $3\text{ a }6\%$), ao passo que ligas de alumínio metálicas manufaturadas aditivamente apresentam amortecimento material muito inferior ($\zeta_{\text{AlSi10Mg}} \approx \num{0.005}$ a $\num{0.02}$, $0{,}5\text{ a }2\%$). Essa discrepância altera substancialmente o fator de amplificação dinâmica $Q = 1 / (2\zeta)$ na ressonância;
-  \item \textbf{razão de rigidez e microestrutura celular:} a liga AlSi10Mg produzida por L-PBF exibe módulo de elasticidade cerca de 25 vezes superior ao do filamento termoplástico ($E_{\text{metal}} = \SI{68.0}{\giga\pascal}$ contra $E_{\text{PLA}} \approx \SI{2.5}{\giga\pascal}$ a $\SI{3.5}{\giga\pascal}$). Além disso, a microestrutura do metal solidificado por laser é formada por redes celulares eutéticas de silício finamente dispersas em matriz de alumínio, diferindo radicalmente da adesão interlaminar por coalescência térmica entre cordões (\textit{rasters}) do FDM;
-  \item \textbf{sensibilidade a entalhes, porosidades e tensões residuais:} o processo L-PBF induz tensões residuais térmicas de tração elevadas decorrentes do ciclo térmico ultrarrápido de fusão/solidificação, além de microporosidades intrínsecas (defeitos de falta de fusão e poros esféricos de aprisionamento de gás). Sob vibração aleatória estocástica, esses defeitos atuam como concentradores de tensão severos com mecanismo de propagação de trincas por fadiga de alto ciclo e fratura frágil, ausentes na viscoelasticidade dúctil-viscosa do polímero.
+  \item \textbf{amortecimento e dissipação interna de energia:} termoplásticos exibem comportamento viscoelástico pronunciado, com amortecimento interno fortemente dependente da taxa de deformação e temperatura ($\zeta_{\text{polímero}} \approx \num{0.03}$ a $\num{0.06}$, ou seja, $3\text{ a }6\%$), enquanto ligas metálicas aeroespaciais consolidadas por fusão a laser apresentam dissipação histerética muito inferior ($\zeta_{\text{AlSi10Mg}} \approx \num{0.005}$ a $\num{0.02}$, $0{,}5\text{ a }2\%$). Essa discrepância altera de forma radical o fator de amplificação dinâmica na ressonância ($Q = 1 / [2\zeta]$);
+  \item \textbf{razão de rigidez e microestrutura celular:} a liga AlSi10Mg produzida por L-PBF exibe módulo de elasticidade cerca de 25 vezes superior ao de termoplásticos comerciais ($E_{\text{metal}} = \SI{68.0}{\giga\pascal}$ contra $E_{\text{polímero}} \approx \SI{2.5}{\giga\pascal}$ a $\SI{3.5}{\giga\pascal}$). Além disso, a microestrutura do metal solidificado por laser é formada por redes celulares eutéticas de silício finamente dispersas em matriz de alumínio, diferindo substancialmente da adesão térmica entre filamentos poliméricos;
+  \item \textbf{sensibilidade a entalhes, porosidades térmicas e mecânica da fratura:} o processo L-PBF induz tensões residuais térmicas de tração decorrentes do ciclo térmico ultrarrápido de fusão/solidificação, além de microporosidades intrínsecas (defeitos de falta de fusão e poros de aprisionamento gasoso). Sob vibração aleatória estocástica, tais descontinuidades atuam como concentradores de tensão severos com mecanismo de propagação de trincas por fadiga de alto ciclo e fratura linear elástica frágil, ausentes na viscoelasticidade dúctil de polímeros.
 \end{alineas}
 
-Em face dessas distinções fenomenológicas, o papel da caracterização experimental em PLA (FDM) nesta pesquisa é delimitado com estrita precisão: ele constitui uma etapa preliminar de \textbf{prova de conceito cinemática, validação dimensional de montagem (\textit{fit-check} no dispensador P-POD) e calibração do ferramental numérico de malha e solver}. A homologação e a qualificação de voo do satélite para o ambiente espacial não se apoiam em extrapolação empírica direta dos ensaios em PLA, mas sim na \textbf{simulação computacional de alta fidelidade da liga metálica AlSi10Mg (\textit{FEA Ground Truth})} sob os parâmetros canônicos de DfAM e L-PBF, fixando as diretrizes mandatórias para futuros ensaios dinâmicos de mesa vibratória (GVT) diretamente no protótipo metálico qualificado.
+Em face dessas distinções fenomenológicas, este trabalho descarta categoricamente qualquer tentativa de extrapolação empírica de respostas dinâmicas ou calibração de malha a partir de materiais plásticos. O emprego de modelos conceituais tridimensionais preliminares em filamento termoplástico (PLA) circunscreve-se estritamente à verificação física de empacotamento volumétrico e checagem dimensional de montagem (\textit{fit-check} virtual) nas interfaces dos trilhos do casulo lançador P-POD e placas de aviônica PC/104. Toda a modelagem constitutiva, o banco de dados de simulações elastodinâmicas e a qualificação espacial são ancorados de forma direta, unívoca e rigorosa nas propriedades da liga metálica de voo AlSi10Mg processada por L-PBF.
 
 \section{Fases da metodologia}
 \label{sec:fases}
 
-\subsection{Prototipagem preliminar em PLA e ancoragem no modelo metálico de voo}
+\subsection{Ancoragem constitutiva na liga aeroespacial AlSi10Mg (L-PBF)}
 \label{subsec:caracterizacao}
 
-A primeira fase metodológica compreende a prototipagem preliminar em Poliácido Láctico (PLA) e a delimitação do ferramental numérico de qualificação aeroespacial. Em componentes produzidos por Manufatura Aditiva por Deposição de Filamento Fundido (FDM), a extrusão em camadas sobrepostas e o direcionamento das trajetórias de deposição (\textit{raster}) quebram a hipótese de isotropia macroscópica, conferindo ao material um comportamento elástico ortotrópico dependente do ângulo de construção e da adesão interlaminar (DAI \textit{et al.}, 2020; POZORSKI; ANDRZEJEWSKI, 2025). As orientações típicas de impressão e a formação das camadas estão ilustradas esquematicamente na Figura~\ref{fig:orientacoes-pla}.
+A primeira fase metodológica compreende a ancoragem constitutiva unívoca na liga aeroespacial AlSi10Mg aliviada termicamente ($300^\circ\text{C} / 2\text{ h}$), amplamente consolidada na indústria espacial para componentes estruturais fabricados por Fusão em Leito de Pó a Laser (L-PBF). Em conformidade com as normas internacionais de qualificação de materiais aeroespaciais e relatórios técnicos de caracterização aditiva (SLEJKO \textit{et al.}, 2023; KHAN; RICCIO, 2024), adotam-se as propriedades mecânicas canônicas listadas na Tabela~\ref{tab:propriedades-alsi10mg}.
 
-\begin{figure}[htb]
-  \caption{Orientações de impressão e anisotropia elástica no processo de manufatura por filamento fundido (FDM)}
-  \label{fig:orientacoes-pla}
-  \begin{center}
-    \includegraphics[width=0.75\textwidth]{figuras/orientacoes_impressao_pla.png}
-  \end{center}
-  \fonte{Adaptado de Dai \textit{et al.} (2020).}
-\end{figure}
+\begin{table}[htb]
+  \caption{Propriedades mecânicas e critérios de projeto da liga aeroespacial AlSi10Mg (L-PBF) com alívio térmico}
+  \label{tab:propriedades-alsi10mg}
+  \small
+  \SingleSpacing
+  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\centering\arraybackslash}p{3.5cm} >{\centering\arraybackslash}p{4.0cm}@{}}
+    \toprule
+    \textbf{Propriedade termomecânica} & \textbf{Símbolo / Parâmetro} & \textbf{Valor adotado} \\
+    \midrule
+    Módulo de elasticidade longitudinal (Young) & $E$ & \SI{68.0}{\giga\pascal} \\
+    Coeficiente de Poisson & $\nu$ & \num{0.33} \\
+    Massa específica & $\rho$ & \SI{2670.0}{\kilo\gram\per\cubic\metre} \\
+    Limite de escoamento convencional ($0{,}2\%$) & $\sigma_{\text{yield}}$ & \SI{230.0}{\mega\pascal} \\
+    Limite de resistência à tração & $\sigma_{\text{ult}}$ & \SI{340.0}{\mega\pascal} \\
+    Fator de segurança de qualificação (NASA GEVS) & $FS_{\text{yield}}$ & \num{1.25} \\
+    Tensão admissível de projeto estocástico & $\sigma_{\text{adm}} = \sigma_{\text{yield}} / FS_{\text{yield}}$ & \SI{184.0}{\mega\pascal} \\
+    Limiar de propagação de trincas por fadiga & $\Delta K_{th}$ & \SI{2.50}{\mega\pascal\sqrt{\metre}} \\
+    \bottomrule
+  \end{tabularx}
+  \fonte{Elaborada pelo autor com base em Slejko \textit{et al.} (2023) e NASA (2013).}
+\end{table}
 
-A relação constitutiva tridimensional que correlaciona o tensor de deformações linearizadas ($\boldsymbol{\varepsilon}$) com o tensor de tensões de Cauchy ($\boldsymbol{\sigma}$) para materiais ortotrópicos é expressa matricialmente na Equação~\eqref{eq:compliancia}:
+No regime de pequenas deformações elásticas e vibração linear, o comportamento tridimensional do metal isotrópico contínuo é governado pela lei constitutiva generalizada de Hooke, expressa na Equação~\eqref{eq:hooke-3d}:
 \begin{equation}
-  \begin{Bmatrix} \varepsilon_x \\ \varepsilon_y \\ \varepsilon_z \\ \gamma_{yz} \\ \gamma_{xz} \\ \gamma_{xy} \end{Bmatrix}
-  =
-  \underbrace{\begin{bmatrix}
-    \frac{1}{E_x} & -\frac{\nu_{yx}}{E_y} & -\frac{\nu_{zx}}{E_z} & 0 & 0 & 0 \\
-    -\frac{\nu_{xy}}{E_x} & \frac{1}{E_y} & -\frac{\nu_{zy}}{E_z} & 0 & 0 & 0 \\
-    -\frac{\nu_{xz}}{E_x} & -\frac{\nu_{yz}}{E_y} & \frac{1}{E_z} & 0 & 0 & 0 \\
-    0 & 0 & 0 & \frac{1}{G_{yz}} & 0 & 0 \\
-    0 & 0 & 0 & 0 & \frac{1}{G_{xz}} & 0 \\
-    0 & 0 & 0 & 0 & 0 & \frac{1}{G_{xy}}
-  \end{bmatrix}}_{\mathbf{S}}
-  \begin{Bmatrix} \sigma_x \\ \sigma_y \\ \sigma_z \\ \tau_{yz} \\ \tau_{xz} \\ \tau_{xy} \end{Bmatrix}
-  \label{eq:compliancia}
+  \boldsymbol{\sigma} = \mathbf{C} : \boldsymbol{\varepsilon} = \lambda \operatorname{tr}(\boldsymbol{\varepsilon})\mathbf{I} + 2\mu\boldsymbol{\varepsilon}
+  \label{eq:hooke-3d}
 \end{equation}
-A simetria termodinâmica da energia de deformação impõe que a matriz de compliância seja estritamente simétrica ($\mathbf{S} = \mathbf{S}^{\top}$), exigindo a conformidade das relações recíprocas da Equação~\eqref{eq:simetria}:
+na qual $\lambda$ e $\mu$ denotam os parâmetros elásticos de Lamé calculados a partir de $E$ e $\nu$:
 \begin{equation}
-  \frac{\nu_{ij}}{E_i} = \frac{\nu_{ji}}{E_j}, \qquad \forall \; i,j \in \{x,y,z\}
-  \label{eq:simetria}
+  \lambda = \frac{E\,\nu}{(1+\nu)(1-2\nu)} = \SI{44.20}{\giga\pascal}, \qquad \mu = \frac{E}{2(1+\nu)} = G = \SI{25.56}{\giga\pascal}
+  \label{eq:lame}
 \end{equation}
 
-Nesta pesquisa, a manufatura preliminar em filamento termoplástico de PLA é empregada estritamente como um ensaio funcional qualitativo de montagem cinemática (\textit{fit-check}), verificação dimensional das interfaces de contato e inspeção de fatiamento dos vazios celulares reentrantes frente aos trilhos do dispensador P-POD. Essa etapa preliminar permite auditar a montabilidade física dos barramentos internos de aviônica PC/104 sem incorrer nos elevados custos operacionais de fusão a laser em leito de pó metálico (L-PBF).
-
-Todavia, em consonância com as distinções fenomenológicas delineadas na Seção~\ref{sec:similaridade} (em especial as divergências críticas de amortecimento material viscoelástico e mecanismos de fratura por fadiga), a rota metodológica e as 250 simulações de alta fidelidade deste trabalho ancoram-se de forma direta e unívoca nas propriedades termomecânicas canônicas da liga aeroespacial AlSi10Mg aliviada termicamente ($E = \SI{68.0}{\giga\pascal}$, $\nu = \num{0.33}$, $\rho = \SI{2670.0}{\kilo\gram\per\cubic\metre}$ e $\sigma_{\text{yield}} = \SI{230.0}{\mega\pascal}$). Essa decisão metodológica elimina as distorções decorrentes de extrapolações empíricas entre polímeros e metais, assegurando que todo o banco de dados do DoE, a inferência neural da ResNet e a qualificação espacial da NASA GEVS reflitam com máxima fidelidade o comportamento do chassi metálico de voo.
+Essa ancoragem direta nas constantes termomecânicas da liga metálica de voo elimina as incertezas e distorções constitutivas inerentes a extrapolações polímero-metal, assegurando que o espaço amostral do DoE, a inferência neural da ResNet e as margens de qualificação espacial da NASA GEVS reproduzam com alta fidelidade a física real do chassi primário de voo.
 
 \subsection{Modelagem implícita e homogeneização assintótica}
 \label{subsec:implicita}
 
-A segunda fase da metodologia aborda a parametrização matemática e a redução computacional da estrutura celular. Cumpre explicitar a coexistência e os papéis complementares de duas representações geométricas no pipeline de desenvolvimento: a formulação implícita por superfícies de nível com base de Fourier (\textit{Fourier Level-Set}) representa o arcabouço teórico para a homogeneização analítica e o projeto de estruturas celulares com gradação funcional de densidade (\textit{Functionally Graded Lattices} -- FGL), viabilizando transições contínuas de densidade relativa; por sua vez, a síntese computacional em ambiente CAD via CadQuery/OpenCASCADE e a discretização por elementos finitos no Gmsh e Ansys utilizam representação por contorno (\textit{Boundary Representation} -- B-Rep) governada pelo vetor explícito de parâmetros geométricos $\mathbf{x} = [\theta, t, l, h]^\top$.
+A segunda fase da metodologia aborda a parametrização matemática e a redução computacional da estrutura celular. Cumpre explicitar a coexistência e os papéis complementares de duas representações geométricas no pipeline de desenvolvimento: a formulação implícita por superfícies de nível com base de Fourier (\textit{Fourier Level-Set}) representa o arcabouço teórico para a homogeneização analítica e o projeto de estruturas celulares com gradação funcional de densidade (\textit{Functionally Graded Lattices} -- FGL), viabilizando transições contínuas de densidade relativa; por sua vez, a síntese computacional em ambiente CAD via CadQuery/OpenCASCADE e a discretização por elementos finitos no Gmsh e Code\_Aster utilizam representação por contorno (\textit{Boundary Representation} -- B-Rep) governada pelo vetor explícito de parâmetros geométricos $\mathbf{x} = [\theta, t, l, h]^\top$.
 
 No domínio analítico do \textit{Level-Set}, o domínio sólido $\Omega$ do metamaterial é definido pelo conjunto de pontos no espaço tridimensional delimitados pelo campo escalar contínuo $V(x,y,z)$, sujeito ao limiar de corte $t$:
 \begin{equation}
@@ -175,21 +176,21 @@ Portanto, o isolamento dinâmico global de \SI{76.50}{\percent} (\SI{-12.6}{\dec
 \subsection{Simulação dinâmica computacional (CAE)}
 \label{subsec:cae}
 
-A terceira fase metodológica compreende a modelagem e a execução automatizada de simulações em elementos finitos de alta fidelidade (CAE) em lote, empregando o solver Ansys MAPDL (\textit{Mechanical APDL}) integrado a rotinas em Python via PyAnsys (\code{src/analysis/ansys_batch_runner.py}). O objetivo central dessa etapa é submeter as geometrias geradas pelo planejamento de experimentos (DoE) aos perfis estocásticos de vibração aleatória regulamentados pelo setor aeroespacial, alimentando o banco de dados para treinamento da rede neural substituta.
+A terceira fase metodológica compreende a modelagem e a execução automatizada de simulações em elementos finitos de alta fidelidade (CAE) em lote, empregando o solver de código aberto \textbf{Code\_Aster} (desenvolvido pela EDF) em ambiente Linux/WSL, orquestrado por scripts em Python dedicados (\code{src/analysis/code_aster_runner.py}) e acoplado ao gerador de malhas \textbf{Gmsh} (\code{src/mesh/gmsh_engine.py}). O objetivo central dessa etapa é submeter as geometrias geradas pelo planejamento de experimentos (DoE) aos perfis estocásticos de vibração aleatória regulamentados pelo setor aeroespacial, alimentando o banco de dados de 250 pontos para treinamento do modelo substituto neural guiado por física.
 
-\subsubsection{Discretização espacial, formulação dos elementos finitos (SOLID187) e convergência de malha}
+\subsubsection{Discretização espacial, formulação dos elementos finitos (Gmsh Tet10) e convergência de malha}
 \label{subsubsec:solid187}
 
-Para capturar com alta fidelidade as concentrações de tensão e gradientes de deformação nas costelas esbeltas e nas junções nodais da estrutura auxética, o domínio contínuo é discretizado com elementos sólidos tetraédricos de 10 nós de segunda ordem (\code{SOLID187}). Cada nó possui três graus de liberdade translacionais ($u_x, u_y, u_z$). A formulação quadrática de interpolação de deslocamentos elimina o travamento numérico por cisalhamento (\textit{shear locking}), acomoda com precisão as superfícies curvas reentrantes e garante convergência assintótica em regiões de forte gradiente de tensão (POZORSKI; ANDRZEJEWSKI, 2025).
+Para capturar com alta fidelidade as concentrações de tensão e gradientes de deformação nas costelas esbeltas e nas junções nodais da estrutura auxética, o domínio contínuo é discretizado no Gmsh com elementos sólidos tetraédricos de 10 nós de segunda ordem (\textbf{Tet10}, formulação quadrática isorrégua ao SOLID187 dos códigos comerciais). Cada elemento Tet10 possui nós nos quatro vértices e nós adicionais no ponto médio de cada uma das seis arestas, totalizando 10 nós com três graus de liberdade translacionais por nó ($u_x, u_y, u_z$). A formulação quadrática de interpolação polinomial de deslocamentos elimina completamente o travamento numérico por cisalhamento (\textit{shear locking}), mapeia com exatidão as superfícies curvas reentrantes e garante convergência assintótica em regiões de forte gradiente de deformação sob flexão celular (POZORSKI; ANDRZEJEWSKI, 2025).
 
 As propriedades materiais adotadas para a liga de alumínio aeroespacial AlSi10Mg aliviada termicamente (\SI{300}{\celsius}/\SI{2}{\hour}) compreendem: módulo de Young $E = \SI{68.0}{\giga\pascal}$, coeficiente de Poisson $\nu = \num{0.33}$, massa específica $\rho = \SI{2670.0}{\kilo\gram\per\cubic\metre}$ e limite de escoamento $\sigma_{\text{yield}} = \SI{230.0}{\mega\pascal}$. Sob o fator de segurança normativo da NASA para cargas dinâmicas de voo ($FS_{\text{yield}} = \num{1.25}$), estabelece-se a tensão admissível de projeto em $\sigma_{\text{adm}} = \sigma_{\text{yield}} / 1{,}25 = \SI{230.0}{\mega\pascal} / \num{1.25} = \SI{184.0}{\mega\pascal}$, garantindo estrita consistência matemática com a margem de segurança calculada para o chassi ótimo frente ao pico estocástico a $3\sigma$ ($MS_{\text{yield}} = (\sigma_{\text{adm}} / \sigma_{3\sigma}) - 1 = (184{,}0 / 166{,}91) - 1 = +0{,}102$).
 
 \paragraph*{Resolução da mesoestrutura e estudo de convergência de malha.}
 A fidelidade na predição da tensão estocástica de pico a $3\sigma$ e a integridade à fadiga exigem que os gradientes de tensão de flexão nas costelas celulares de espessura delgada ($t = \SI{0.613}{\milli\metre}$) sejam plenamente resolvidos pela malha. Discretizações com apenas 1 elemento ao longo da espessura da parede subestimam sistematicamente o momento fletor interno e a tensão de entalhe nos vértices reentrantes, gerando uma falsa sensação de segurança estrutural.
 
-Para mitigar esse risco numérico, implementou-se um protocolo rigoroso de controle de malha adaptativo no Ansys MAPDL:
+Para mitigar esse risco numérico, implementou-se um protocolo rigoroso de controle de malha adaptativo via Gmsh API integrado ao Code\_Aster:
 \begin{alineas}
-  \item \textbf{refinamento através da espessura:} imposição de tamanho máximo de elemento nas costelas celulares de $h_{\text{elem}} \le t / 3 \approx \SI{0.20}{\milli\metre}$, assegurando a presença de no mínimo 3 a 4 camadas de elementos tetraédricos quadráticos ao longo da espessura da haste;
+  \item \textbf{refinamento através da espessura:} imposição de tamanho máximo de elemento nas costelas celulares de $h_{\text{strut}} \le t / 3 \approx \SI{0.20}{\milli\metre}$, assegurando a presença de no mínimo 3 a 4 camadas de elementos tetraédricos quadráticos Tet10 ao longo da espessura da haste;
   \item \textbf{controle de curvatura nos entalhes reentrantes:} definição de raio de concordância mínimo $R_{\text{notch}} \ge \SI{0.50}{\milli\metre}$ nas junções celulares, com refinamento por arco subtendido ($\Delta \theta_{\text{arco}} \le \SI{15}{\degree}$ por elemento), capturando com exatidão o fator de concentração de tensões elásticas:
   \begin{equation}
     K_t = \frac{\sigma_{\text{notch, max}}}{\sigma_{\text{nominal}}}
@@ -206,7 +207,7 @@ A determinação dos modos próprios de vibrar e das frequências naturais funda
   \left( [\mathbf{K}] - \omega_i^{2} [\mathbf{M}] \right) \{\phi_i\} = \{0\}
   \label{eq:autovalor}
 \end{equation}
-na qual $[\mathbf{K}]$ denota a matriz de rigidez global (incorporando o enrijecimento por tensões associado às pré-cargas de montagem interna dos subsistemas eletrônicos), $[\mathbf{M}]$ representa a matriz de massa consistente e $\omega_i = 2\pi f_i$ é a frequência angular associada ao $i$-ésimo autovetor modal $\{\phi_i\}$. A extração dos autovalores no intervalo de interesse (\SIrange{20}{2000}{\hertz}) é executada pelo algoritmo de \textit{Block Lanczos}.
+na qual $[\mathbf{K}]$ denota a matriz de rigidez global (incorporando o enrijecimento por tensões associado às pré-cargas de montagem interna dos subsistemas eletrônicos), $[\mathbf{M}]$ representa a matriz de massa consistente e $\omega_i = 2\pi f_i$ é a frequência angular associada ao $i$-ésimo autovetor modal $\{\phi_i\}$. A extração dos autovalores no intervalo de interesse (\SIrange{20}{2000}{\hertz}) é executada no Code\_Aster pelo operador \code{CALC_MODES} com o algoritmo modal de Sorensen/Lanczos (\code{METHODE='SORENSEN'}).
 
 \paragraph*{Condições de contorno computacionais: modo engastado versus suporte flexível de ensaio.}
 A arquitetura computacional desenvolvida nesta pesquisa formaliza e implementa dois modos complementares de condições de contorno nos solvers elastodinâmicos (\code{open_fea_kernel.py}, \code{code_aster_runner.py} e \code{calculix_runner.py}):
@@ -250,7 +251,7 @@ na faixa de \SIrange{20}{2000}{\hertz}, com amortecimento estrutural crítico co
   \fonte{Adaptada de NASA (2013).}
 \end{table}
 
-A resposta dinâmica transmitida para a interface de fixação central da carga útil (\textit{payload mount}) é calculada pela superposição modal estocástica, permitindo obter a aceleração eficaz $\Grmspay$ e o coeficiente de transmissibilidade dinâmica passiva ($T$):
+No solver Code\_Aster, a integração da resposta dinâmica sob excitação de base estocástica é formalizada pelo comando nativo \code{DYNA_ALEA_MODAL(OPTION='REPONSE_SPECTRALE')}, operando por superposição modal estocástica sobre os modos próprios calculados previamente e associado à função espectral de potência de entrada com amortecimento constante ($\zeta = \num{0.020}$). A resposta dinâmica transmitida para a interface de fixação central da carga útil (\textit{payload mount}) é calculada de forma contínua, permitindo obter a aceleração eficaz $\Grmspay$ e o coeficiente de transmissibilidade dinâmica passiva ($T$):
 \begin{equation}
   T = \frac{\Grmspay}{\Grmsbase} = \frac{\Grmspay}{\num{14.1}}
   \label{eq:transmissibilidade}
@@ -287,7 +288,7 @@ o que confere um fator de segurança de vida de $4\times$ perante fadiga estocá
 \subsubsection{Modelo substituto neural guiado por física (\textit{Physics-Guided ResNet})}
 \label{subsubsec:resnet}
 
-O tempo despendido pelo Ansys MAPDL para resolver a análise modal e a resposta PSD completa varia entre 60 e 180 segundos por configuração geométrica tridimensional. Em campanhas de otimização evolutiva de larga escala como o NSGA-II, em que mais de \num{10000} topologias celulares devem ser avaliadas iterativamente, a dependência direta do solver numérico torna o ciclo de busca computacionalmente impraticável.
+O tempo despendido pelo solver Code\_Aster (acoplado a malhas Gmsh Tet10) para resolver a análise modal e a resposta PSD completa varia entre 60 e 180 segundos por configuração geométrica tridimensional. Em campanhas de otimização evolutiva de larga escala como o NSGA-II, em que mais de \num{10000} topologias celulares devem ser avaliadas iterativamente, a dependência direta do solver numérico torna o ciclo de busca computacionalmente impraticável.
 
 Para transpor essa barreira sem produzir predições não físicas nas zonas limítrofes do espaço paramétrico, desenvolveu-se uma rede neural profunda com blocos residuais guiada por leis físicas (\textit{Physics-Guided ResNet}), codificada no módulo \code{src/neural/surrogate_model.py}.
 
@@ -326,7 +327,7 @@ Para garantir aderência fenomenológica e impedir alucinações matemáticas na
 \end{equation}
 onde:
 \begin{alineas}
-  \item \textbf{perda de fidelidade aos dados numéricos ($\mathcal{L}_{\text{MSE}}$):} erro quadrático médio calculado entre as predições $\hat{\mathbf{y}}_i$ e as respostas obtidas no Ansys MAPDL sobre o minilote de dimensão $B$:
+  \item \textbf{perda de fidelidade aos dados numéricos ($\mathcal{L}_{\text{MSE}}$):} erro quadrático médio calculado entre as predições $\hat{\mathbf{y}}_i$ e as respostas numéricas de alta ordem obtidas no Code\_Aster (Gmsh Tet10) sobre o minilote de dimensão $B$:
   \begin{equation}
     \mathcal{L}_{\text{MSE}} = \frac{1}{B} \sum_{i=1}^{B} \sum_{j=1}^{4} \left( \hat{y}_{i,j} - y_{i,j} \right)^{2}
     \label{eq:mse}
@@ -375,7 +376,7 @@ O treinamento foi conduzido ao longo de 350 épocas utilizando o otimizador Adam
 A validação gráfica por meio de gráficos de paridade nos quatro quadrantes de predição, disposta na Figura~\ref{fig:paridade}, confirma a aderência dos valores preditos sobre a bissetriz ideal ($y_{\text{pred}} = y_{\text{true}}$), sem dispersão heterocedástica.
 
 \begin{figure}[htb]
-  \caption{Gráficos de paridade comparando predições neurais residuais e respostas numéricas de alta ordem (Ansys MAPDL) no conjunto de teste}
+  \caption{Gráficos de paridade comparando predições neurais residuais e respostas numéricas de alta ordem (Code\_Aster Tet10 via Linux/WSL) no conjunto de teste}
   \label{fig:paridade}
   \begin{center}
     \includegraphics[width=0.85\textwidth]{figuras/parity_plots.png}
@@ -422,7 +423,7 @@ O grafo opera com quatro nós determinísticos sequenciais com roteamento condic
   Caso ocorra violação de qualquer parâmetro, a aresta condicional \code{route_after_dfam} finaliza a avaliação com o status \code{REJECTED_DFAM}, poupando processamento de predição e simulação;
   \item \textbf{\code{NeuralSurrogateAgent} (predição dinâmica ultraveloz):} ativado após a aprovação no portão DfAM, o modelo ResNet estima, em submilissegundos, as quatro respostas elastodinâmicas ($\hat{f}_1, \hat{\sigma}_{3\sigma}, \hat{G}_{\text{rms, payload}}, \hat{T}$);
   \item \textbf{\code{GevsQualifierAgent} (qualificação normativa espacial):} verifica o cumprimento dos requisitos NASA GEVS: rigidez fundamental $f_1 \ge \SI{100.0}{\hertz}$, Margem de Segurança de escoamento $MS_{\text{yield}} > 0$ e dano estocástico acumulado de Steinberg $D \le \num{0.25}$. Geometrias não conformes são direcionadas para \code{REJECTED_GEVS};
-  \item \textbf{\code{GroundTruthFeaAgent} (validação física de alta ordem):} candidatos homologados na fronteira de Pareto avançam para a confirmação física final no Ansys MAPDL com elementos \code{SOLID187}, recebendo o status de certificação \code{QUALIFIED}.
+  \item \textbf{\code{GroundTruthFeaAgent} (validação física de alta ordem):} candidatos homologados na fronteira de Pareto avançam para a confirmação física final no solver Code\_Aster com elementos tetraédricos de segunda ordem Gmsh Tet10, recebendo o status de certificação \code{QUALIFIED}.
 \end{alineas}
 
 A Tabela~\ref{tab:comparativo-orquestradores} compara as características técnicas do arranjo em LangGraph frente a frameworks consolidados de engenharia e orquestração científica de workflows.
@@ -499,7 +500,7 @@ onde $\omega_d = \omega_n \sqrt{1 - \zeta^2}$. Sob amplificação dinâmica máx
 \subsection{Homologação física de voo e integridade estrutural em fratura de entalhe (LEFM/NSIF)}
 \label{subsec:validacao}
 
-A última fase metodológica consolida a homologação estrutural do satélite e a verificação da integridade à fadiga vibracional de alto ciclo sob o espectro estocástico da NASA GEVS. Ao contrário de formulações teóricas que tentam transpor analiticamente tensores elásticos e amortecimento a partir de amostras termoplásticas impressas por FDM por meio de fatores empíricos de escala, esta pesquisa adota com transparência a modelagem computacional tridimensional direta na liga metálica aeroespacial AlSi10Mg (L-PBF) com elementos finitos de alta ordem (\code{SOLID187} e \code{Tet10}). Essa abordagem elimina as fontes de incerteza da similaridade incompleta (notadamente a discrepância de amortecimento viscoelástico e a sensibilidade a porosidades térmicas de solidificação rápida), garantindo que os autovalores modais e as tensões estocásticas de $3\sigma$ correspondam rigorosamente ao modelo qualificado para o ambiente espacial.
+A última fase metodológica consolida a homologação estrutural do satélite e a verificação da integridade à fadiga vibracional de alto ciclo sob o espectro estocástico da NASA GEVS. Ao contrário de formulações teóricas que tentam transpor analiticamente tensores elásticos e amortecimento a partir de amostras termoplásticas impressas por FDM por meio de fatores empíricos de escala, esta pesquisa adota com transparência a modelagem computacional tridimensional direta na liga metálica aeroespacial AlSi10Mg (L-PBF) com elementos finitos tetraédricos de segunda ordem de alta fidelidade (\code{Tet10}) no solver Code\_Aster. Essa abordagem elimina as fontes de incerteza da similaridade incompleta (notadamente a discrepância de amortecimento viscoelástico e a sensibilidade a porosidades térmicas de solidificação rápida), garantindo que os autovalores modais e as tensões estocásticas de $3\sigma$ correspondam rigorosamente ao modelo qualificado para o ambiente espacial.
 
 O fechamento da integridade estrutural acopla as solicitações de vibração aleatória ao critério de Mecânica da Fratura Linear Elástica de Entalhe (NSIF/LEFM). Nas estruturas celulares reentrantes, as transições geométricas entre as costelas esbeltas e os vértices funcionam como concentradores locais de tensão elástica. Para garantir a segurança de voo e prevenir o início ou a propagação de microfissuras a partir de porosidades subsuperficiais induzidas pelo processo L-PBF, avalia-se a amplitude assintótica do Fator de Intensidade de Tensão de Entalhe em Modo I ($\Delta K_1^{V}$) sob o carregamento de pico estocástico a $3\sigma$ (COLLINI; MENEGHETTI, 2024). O chassi é qualificado para o lançamento espacial se a solicitação local satisfizer a condição de não propagação assintótica de trincas por fadiga:
 \begin{equation}
@@ -508,32 +509,32 @@ O fechamento da integridade estrutural acopla as solicitações de vibração al
 \end{equation}
 em que $\Delta K_{th,\text{metal}} = \SI{2.50}{\mega\pascal\sqrt{\metre}}$ representa o limiar canônico de propagação por fadiga da liga AlSi10Mg tratada termicamente. Esse critério assintótico atua de forma complementar e sinérgica à regra linear de Palmgren-Miner pelo método de três bandas gaussianas de Steinberg ($D \le \num{0.25}$) e à contenção da tensão máxima de von Mises a $3\sigma$ estritamente abaixo da tensão admissível de escoamento ($\sigma_{\text{adm}} = \SI{184.0}{\mega\pascal}$).
 
-\section{Roteiro de transição e viabilidade para stack aeroespacial 100\% open source}
+\section{Arquitetura computacional aeroespacial 100\% open source em ambiente Linux/WSL}
 \label{sec:opensource}
 
-Com o propósito de conferir ampla reprodutibilidade científica, viabilizar a execução massiva de simulações em supercomputadores (HPC) sem custos proibitivos de licenciamento proprietário e alinhar o desenvolvimento às diretrizes abertas das agências espaciais internacionais, estruturou-se um roteiro técnico de migração da stack computacional atual para ferramentas \textit{open source} consolidadas no setor nuclear e aeroespacial. A Tabela~\ref{tab:stack-opensource} sintetiza a arquitetura aberta proposta, estabelecendo a equivalência funcional para cada etapa da cadeia de projeto.
+Com o propósito de conferir rigor de engenharia, reprodutibilidade científica irrestrita e independência operacional de softwares proprietários ou licenças comerciais de alto custo, este trabalho consolidou uma esteira de simulação e qualificação totalmente aberta executada em ambiente nativo Linux/WSL. Longe de constituir uma proposta conceitual para desenvolvimentos futuros, a stack aberta atua como a \textbf{espinha dorsal computacional desenvolvida, testada e executada nesta pesquisa}. A Tabela~\ref{tab:stack-opensource} sintetiza a arquitetura dos componentes de software, suas responsabilidades no pipeline aeroespacial e as justificativas técnicas associadas.
 
 \begin{table}[htb]
-  \caption{Mapeamento de migração da stack computacional para o ecossistema 100\% open source}
+  \caption{Arquitetura e responsabilidades do ecossistema computacional 100\% open source em Linux/WSL}
   \label{tab:stack-opensource}
   \footnotesize
   \SingleSpacing
-  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.8cm} >{\raggedright\arraybackslash}p{2.8cm} >{\raggedright\arraybackslash}p{3.2cm} >{\raggedright\arraybackslash}X@{}}
+  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.8cm} >{\raggedright\arraybackslash}p{3.2cm} >{\raggedright\arraybackslash}X@{}}
     \toprule
-    \textbf{Etapa de projeto} & \textbf{Ferramenta atual} & \textbf{Alternativa open source} & \textbf{Justificativa técnica aeroespacial} \\
+    \textbf{Etapa de projeto} & \textbf{Ferramenta oficial} & \textbf{Papel e justificativa técnica no trabalho} \\
     \midrule
-    \textbf{CAD / DfAM} & Paramétrico proprietário & \textbf{CadQuery / build123d + PyVista} & Modelagem paramétrica baseada em Python puro (OpenCASCADE); geração de SDFs e exportação STEP AP214 sem interface gráfica. \\[4pt]
-    \textbf{Geração de malhas} & Ansys Meshing (SOLID187) & \textbf{Gmsh (API Python)} & Parametrização completa de malhas não estruturadas de tetraedros de segunda ordem (\textit{Tet10}); controle de refinamento em costelas e condições periódicas (PBC). \\[4pt]
-    \textbf{Solvers estruturais (CAE)} & Ansys MAPDL (Mechanical) & \textbf{Code\_Aster (Salome-Meca) / CalculiX} & Solver de elementos finitos certificado para as indústrias nuclear e aeroespacial (EDF); comandos nativos para análise modal (\code{CALC_MODES}) e vibração aleatória (\code{DYNA_ALEA_MODAL}). \\[4pt]
-    \textbf{Dinâmica transiente e choque} & OpenRadioss (Python runner) & \textbf{OpenRadioss (Starter/Engine)} & Solver explícito de alta fidelidade; modelagem transiente não linear da expansão da mola do P-POD, impacto no batente mecânico e cálculo do espectro SRS ($\mathcal{Q}=10$). \\[4pt]
-    \textbf{Homogeneização RVE} & MAPDL periódico & \textbf{FEniCS / scikit-fem} & Plataformas variacionais em Python para solução de EDPs; extração direta do tensor constitutivo homogeneizado $C_{ijkl}^*$ com condições periódicas de contorno. \\[4pt]
-    \textbf{Orquestração de pipeline} & LangGraph (Python) & \textbf{Prefect / Snakemake} & Gerenciamento distribuído de dependências, tolerância a falhas e paralelização massiva em contêineres Docker e nós de computação Slurm sem sobrecarga de agentes. \\
+    \textbf{CAD paramétrico / DfAM} & \textbf{CadQuery / build123d} & Modelagem volumétrica B-Rep programática em Python (OpenCASCADE); verificação diagnóstica dos portões LPBF DfAM e exportação neutra STEP AP214. \\[4pt]
+    \textbf{Geração de malhas CAE} & \textbf{Gmsh (API Python)} & Discretização volumétrica não estruturada com elementos tetraédricos de segunda ordem (\textit{Tet10}); controle refinado na espessura ($h_{\text{strut}} \le \SI{0.20}{\milli\metre}$) e nos entalhes ($R_{\text{notch}} = \SI{0.50}{\milli\metre}$). \\[4pt]
+    \textbf{Solver estrutural primário} & \textbf{Code\_Aster (Salome-Meca)} & Solucionador oficial de produção de alta fidelidade; extração modal pré-tensionada de Lanczos (\code{CALC_MODES}) e resposta estocástica PSD (\code{DYNA_ALEA_MODAL}) sob NASA GEVS (\SI{14.1}{\Grms}). \\[4pt]
+    \textbf{Dinâmica explícita e choque} & \textbf{OpenRadioss} & Simulação dinâmica não linear da expansão da mola e impacto mecânico no batente do casulo lançador P-POD, com síntese de Espectro de Resposta ao Choque (SRS). \\[4pt]
+    \textbf{Verificação cruzada (CAE)} & \textbf{CalculiX (\texttt{.inp})} & Interface independente baseada em sintaxe neutra de cartões para verificação modal cruzada e contraprova de autovalores fundamentais (\textit{cross-check benchmark}). \\[4pt]
+    \textbf{Orquestração de fluxo} & \textbf{LangGraph / Prefect} & Grafo de estados determinístico fortemente tipado (\code{CubeSatState}) com roteamento condicional de descarte antecipado (\textit{fail-fast}) e trilha de auditoria contínua. \\
     \bottomrule
   \end{tabularx}
   \fonte{Elaborada pelo autor (2026).}
 \end{table}
 
-Essa arquitetura aberta viabiliza a execução de estudos paramétricos em escala massiva ($> \num{100000}$ indivíduos) em ambientes de computação em nuvem e clusters acadêmicos, consolidando um arcabouço tecnológico acessível e reprodutível para instituições universitárias do setor aeroespacial.
+Essa esteira integrada em Linux viabiliza a execução de estudos paramétricos e campanhas de qualificação automatizadas sem dependência de licenças comerciais, assegurando total reprodutibilidade científica e permitindo sua implantação direta em supercomputadores acadêmicos (HPC).
 
 \subsection{Motor de síntese geométrica aberta e conformidade DfAM (OpenCadEngine)}
 \label{subsec:opencad-dfam}

@@ -19,9 +19,10 @@ Este documento define os limites normativos, critérios de aceitação e papéis
    - Reconstrução paramétrica e exportação neutral STEP AP214 / Parasolid via servidor MCP SolidWorks.
 
 2. **Analista de Estruturas e Dinâmica FEA (`FeaAgent`):**
-   - Orquestração de rotinas batch no Ansys MAPDL / PyAnsys.
-   - Avaliação modal pré-tensionada e resposta espectral à vibração aleatória (PSD).
-   - Extração da primeira frequência natural fundamental ($f_1$), pico de tensão $3\sigma$ e transmissibilidade da carga útil.
+   - Orquestração da esteira de elementos finitos de alta fidelidade em Linux/WSL via **Code\_Aster** (`src/analysis/code_aster_runner.py`) e gerador de malhas **Gmsh (Tet10)** (`src/mesh/gmsh_engine.py`).
+   - Avaliação modal pré-tensionada (`CALC_MODES` via Sorensen/Lanczos) e resposta espectral à vibração aleatória PSD (`DYNA_ALEA_MODAL`) sob norma NASA GEVS ($14.1\text{ G}_{\text{rms}}$).
+   - Verificação cruzada independente de autovalores modais via **CalculiX** (`.inp`) e simulação de dinâmica explícita de choque no P-POD via **OpenRadioss**.
+   - Extração da primeira frequência natural fundamental ($f_1$), pico de tensão estocástica $3\sigma$ e transmissibilidade dinâmica da carga útil.
 
 3. **Especialista em Metamateriais e Confiabilidade (`MaterialsReliabilityAgent`):**
    - Modelagem contínua via equações fenomenológicas de Gibson-Ashby para sólidos celulares sob flexão.
@@ -101,29 +102,28 @@ $$D = \sum_{i=1}^{3} \frac{n_i}{N_i} = \frac{n_{1\sigma}}{N_{1\sigma}} + \frac{n
 
 ---
 
-## 5. Transição de Materiais: Prototipagem vs. Voo Espacial
+## 5. Delimitação Material: Modelo Conceitual vs. Estrutura Metálica de Voo
 
-O desenvolvimento do CubeSat adota uma estratégia de transição escalonada em duas etapas:
+O desenvolvimento do CubeSat adota rigor estrito quanto à formulação mecânica e delimitação de escopo:
 
-### 5.1 Etapa Experimental / Validação Cinemática (Polímero FDM)
-- **Material:** Ácido Polilático (PLA).
-- **Processo:** Fused Deposition Modeling (FDM) com bico de $0.4\text{ mm}$ e orientação $0^\circ/90^\circ$.
-- **Objetivo:** Validação dimensional, verificação de mecanismos de abertura de antena, encaixe de PCBs no padrão PC/104 e caracterização acústica em mesa vibratória de bancada.
-- **Propriedades Base:**
-  - Módulo Elástico Sólido: $E_s = 3.5\text{ GPa}$
-  - Limite de Escoamento: $\sigma_y = 50.0\text{ MPa}$
-  - Densidade: $\rho_s = 1250.0\text{ kg/m}^3$
+### 5.1 Modelo Conceitual Preliminar de Interface (CAD / Fit-Check Virtual)
+- **Material / Representação:** Ácido Polilático (PLA) / Modelo paramétrico tridimensional.
+- **Escopo e Papel:** Estudo de viabilidade de empacotamento espacial, verificação de mecanismos de abertura de antena, interface dimensional com placas PC/104 e verificação cinemática de montagem (*fit-check* virtual nos trilhos do dispensador P-POD).
+- **Diretriz Mandatória:** Não houve fabricação laboratorial nem caracterização mecânica experimental de bancada (tração ASTM D638, compressão ASTM D695 ou *tap testing*). Qualquer extrapolação de propriedades dinâmicas entre polímeros e metais é descartada formalmente devido à **similaridade incompleta** (discrepâncias severas de amortecimento viscoelástico, sensibilidade térmica e fratura).
 
-### 5.2 Etapa Estrutural de Voo (Liga Metálica LPBF)
-- **Material:** Liga de Alumínio Aeroespacial AlSi10Mg (com tratamento térmico de alívio de tensões $300^\circ\text{C} / 2\text{h}$).
-- **Processo:** Laser Powder Bed Fusion (LPBF / SLM).
-- **Objetivo:** Modelo de voo qualificado capaz de suportar cargas de vibração aleatória, descompressão rápida e ciclos termoelásticos em órbita baixa (LEO).
-- **Propriedades Base:**
-  - Módulo Elástico Sólido: $E_s = 68.0\text{ GPa}$
-  - Limite de Escoamento: $\sigma_y = 230.0\text{ MPa}$
-  - Limite de Resistência à Tração: $\sigma_{\text{uts}} = 340.0\text{ MPa}$
-  - Densidade: $\rho_s = 2680.0\text{ kg/m}^3$
-  - Coeficiente de Poisson: $\nu_s = 0.33$
+### 5.2 Estrutura Metálica de Voo (Liga Aeroespacial AlSi10Mg L-PBF)
+- **Material:** Liga de Alumínio Aeroespacial AlSi10Mg com tratamento térmico de alívio de tensões ($300^\circ\text{C} / 2\text{ h}$).
+- **Processo:** Laser Powder Bed Fusion (L-PBF / SLM).
+- **Objetivo:** Modelo de voo qualificado capaz de suportar cargas de vibração aleatória acústica da NASA GEVS, choque transiente no P-POD e integridade estrutural em órbita baixa (LEO).
+- **Propriedades Canônicas Adotadas:**
+  - Módulo Elástico Longitudinal: $E = 68.0\text{ GPa}$
+  - Limite de Escoamento ($0{,}2\%$): $\sigma_{\text{yield}} = 230.0\text{ MPa}$
+  - Limite de Resistência à Tração: $\sigma_{\text{ult}} = 340.0\text{ MPa}$
+  - Massa Específica: $\rho = 2670.0\text{ kg/m}^3$
+  - Coeficiente de Poisson: $\nu = 0.33$
+  - Fator de Segurança de Qualificação: $FS_{\text{yield}} = 1.25$
+  - Tensão Admissível de Projeto: $\sigma_{\text{adm}} = 184.0\text{ MPa}$
+  - Limiar de Propagação por Fadiga: $\Delta K_{th} = 2.50\text{ MPa}\sqrt{\text{m}}$
   - Expoente de Basquin: $m = 6.8$
   - Coeficiente de Basquin: $C = 1.2 \times 10^{20}$
 

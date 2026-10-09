@@ -6,6 +6,7 @@ torch>=2.2.0
 sympy>=1.12.0
 pytest>=8.0.0
 pytest-cov>=4.1.0
+langgraph>=0.2.0
 
 # Open-Source Aerospace Stack (Optional for local Windows, recommended for Linux HPC)
 # gmsh>=4.12.0
