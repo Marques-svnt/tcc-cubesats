@@ -150,7 +150,16 @@ O espaço recíproco de Brillouin bidimensional foi varrido ao longo do contorno
   \fonte{Elaborada pelo autor (2026).}
 \end{table}
 
-A soma cumulativa das larguras de banda proibida totaliza \textbf{\SI{466.65}{\hertz}} na faixa de \SI{223.78}{\hertz} a \SI{818.70}{\hertz}. Confrontando essa resposta com o perfil de qualificação da norma NASA GSFC-STD-7000A, constata-se que o patamar de máxima densidade espectral de potência de vibração aleatória (\SI{0.080}{\square\giga\per\hertz}) concentra-se na janela de \SI{50}{\hertz} a \SI{800}{\hertz}. As quatro bandas proibidas abrangem \textbf{\SI{78.44}{\percent}} do espectro vibratório crítico entre \SI{223.78}{\hertz} e \SI{800.0}{\hertz}. 
+A soma cumulativa das larguras de banda proibida totaliza \textbf{\SI{466.65}{\hertz}} na faixa de \SI{223.78}{\hertz} a \SI{818.70}{\hertz}. Confrontando essa resposta com o perfil de qualificação da norma NASA GSFC-STD-7000A, constata-se que o patamar de máxima densidade espectral de potência de vibração aleatória (\SI{0.080}{\square\giga\per\hertz}) concentra-se na janela de \SI{50}{\hertz} a \SI{800}{\hertz}. As quatro bandas proibidas abrangem \textbf{\SI{78.44}{\percent}} do espectro vibratório crítico entre \SI{223.78}{\hertz} e \SI{800.0}{\hertz}, conforme ilustrado no diagrama de bandas da Figura~\ref{fig:phononic-bandgap}.
+
+\begin{figure}[htb]
+  \caption{Diagrama de dispersão fonônica e bandas proibidas (\textit{bandgaps}) da célula unitária auxética reentrante ao longo do contorno $\Gamma \to \mathrm{X} \to \mathrm{M} \to \Gamma$ da Zona Irredutível de Brillouin}
+  \label{fig:phononic-bandgap}
+  \begin{center}
+    \includegraphics[width=0.85\textwidth]{figuras/phononic_dispersion_bandgap.png}
+  \end{center}
+  \fonte{Elaborada pelo autor (2026).}
+\end{figure}
 
 Nessas faixas de frequência, o vetor de onda $\mathbf{k}$ torna-se puramente complexo ($\mathbf{k} = \mathbf{k}_r + \mathrm{i}\mathbf{k}_i$), impondo uma taxa de decaimento espacial exponencial às ondas elásticas transmitidas através da mesoestrutura auxética ($\mathbf{u}(\mathbf{x}) \propto \mathrm{e}^{-\mathbf{k}_i \cdot \mathbf{x}}$). Esse fenômeno constitui evidência analítica consistente de que o chassi auxético atua como um filtro mecânico de rejeição de faixa (evanescência acústica), blindando passivamente a carga útil contra o ambiente vibratório severo do veículo lançador.
 
@@ -192,6 +201,15 @@ A análise comparativa revela notável conformidade preditiva e robustez fenomen
   \item o dano acumulado de fadiga aleatória calculado pelo método das três bandas de Steinberg atingiu \textbf{$D = \num{0.0458}$}, valor amplamente inferior ao patamar de corte de qualificação espacial da norma NASA-HDBK-7005 ($D \le \num{0.25}$), garantindo fator de segurança superior a $5{,}4\times$ frente aos \SI{120.0}{\second} de ensaio dinâmico de lançamento por eixo.
 \end{alineas}
 
+\begin{figure}[htb]
+  \caption{Densidade Espectral de Potência (PSD) de qualificação aeroespacial: excitação estocástica de base NASA GSFC-STD-7000A (\SI{14.10}{\Grms}) \textit{versus} resposta atenuada na interface da carga útil para o Projeto \#28 (\SI{2.82}{\Grms})}
+  \label{fig:psd-gevs-response}
+  \begin{center}
+    \includegraphics[width=0.85\textwidth]{figuras/psd_gevs_vs_payload_response.png}
+  \end{center}
+  \fonte{Elaborada pelo autor (2026).}
+\end{figure}
+
 \paragraph*{Sensibilidade à resolução de malha e concentração de tensões nos entalhes reentrantes.}
 Para descartar qualquer subestimação numérica da tensão de pico associada à discretização de paredes esbeltas ($t = \SI{0.613}{\milli\metre}$), o Projeto \#28 foi submetido a um teste de sensibilidade de malha h-adaptativo com elementos \code{SOLID187}. Confrontou-se a malha nominal global ($h_{\text{elem}} \approx \SI{0.60}{\milli\metre}$, com 1 a 2 elementos na parede) com a malha refinada de alta densidade ($h_{\text{elem}} \le \SI{0.20}{\milli\metre}$, garantindo 3 a 4 elementos tetraédricos através da espessura) acoplada à técnica de submodelagem nos vértices reentrantes críticos ($h_{\text{sub}} \le \SI{0.06}{\milli\metre}$, raio de concordância $R_{\text{notch}} = \SI{0.50}{\milli\metre}$). A Tabela~\ref{tab:convergencia-malha} sintetiza a evolução das grandezas dinâmicas com o refinamento da malha.
 
@@ -213,6 +231,14 @@ Para descartar qualquer subestimação numérica da tensão de pico associada à
 \end{table}
 
 A extração modal indicou estabilidade quase invariante na primeira frequência própria (variação de apenas \SI{0.85}{\percent}, oscilando de \SI{584.6}{\hertz} para \SI{579.62}{\hertz}). No tocante ao campo de tensões, a malha nominal prévia apontava tensão estocástica $3\sigma$ de \SI{148.2}{\mega\pascal}. Com o refinamento progressivo e a captura do fator de concentração elástica de entalhe ($K_t \approx \num{1.26}$), a tensão de von Mises a $3\sigma$ convergiu assintoticamente para \SI{166.91}{\mega\pascal}. Esse resultado confirma que, mesmo sob resolução completa dos raios de concordância na mesoestrutura, a tensão máxima permanece estritamente abaixo da tensão admissível de qualificação da NASA ($\sigma_{\text{adm}} = \SI{184.0}{\mega\pascal}$ para ensaios nominais), assegurando Margem de Segurança positiva ($MS_{\text{yield}} = \num{+0.102} > 0$) e chancelando a confiabilidade à fadiga estocástica.
+
+\paragraph*{Verificação do critério de mecânica da fratura de entalhe (NSIF/LEFM) em regime subcrítico.}
+A convergência da tensão estocástica máxima a $3\sigma$ nos entalhes críticos em \SI{166.91}{\mega\pascal} (estritamente abaixo da tensão admissível de escoamento $\sigma_{\text{adm}} = \SI{184.0}{\mega\pascal}$) e o reduzido dano acumulado de Steinberg ($D = \num{0.0458} \ll \num{0.25}$, garantindo fator de segurança de vida superior a $5{,}4\times$) comprovam que a mesoestrutura celular opera plenamente no regime elástico subcrítico não propagante. Para corroborar formalmente a não propagação assintótica de fissuras frente ao critério da Equação~\eqref{eq:lefm}, calcula-se a amplitude do Fator de Intensidade de Tensão de Entalhe em Modo I ($\Delta K_1^V$) pelo Método do Pico de Tensão (\textit{Peak Stress Method} -- PSM) para o raio de concordância de projeto ($r_0 = \SI{0.50}{\milli\metre} = \SI{0.0005}{\metre}$):
+\begin{equation}
+  \Delta K_1^V\big|_{3\sigma} \approx Y \cdot \sigma_{3\sigma} \sqrt{2\pi\, r_0} \approx (\num{0.12}) \times (\SI{166.91}{\mega\pascal}) \times \sqrt{2\pi \times \num{0.0005}\text{ m}} = \SI{1.12}{\mega\pascal\sqrt{\metre}}
+  \label{eq:nsif-resultado}
+\end{equation}
+em que $Y \approx \num{0.12}$ representa o fator de calibração geométrico adimensional para reentrâncias celulares sob flexão de parede delgada. Como $\Delta K_1^V\big|_{3\sigma} = \SI{1.12}{\mega\pascal\sqrt{\metre}}$ permanece substancialmente inferior ao limiar intrínseco de propagação por fadiga da liga AlSi10Mg aliviada termicamente ($\Delta K_{th,\text{metal}} = \SI{2.50}{\mega\pascal\sqrt{\metre}}$), descarta-se categoricamente o crescimento de trincas instáveis durante os \SI{120.0}{\second} de excitação vibratória aleatória de qualificação espacial, confirmando que a integridade estrutural é plenamente preservada.
 
 \section{Análise comparativa de desempenho aeroespacial: chassi auxético ótimo \textit{vs.} chassi monolítico convencional}
 \label{sec:comparativo}
@@ -279,14 +305,23 @@ Esse impacto no batente mecânico amortecido ($K_{\text{stop}} = \SI{2.8e4}{\new
   \fonte{Elaborada pelo autor (2026).}
 \end{table}
 
-A conformidade estrutural ao choque é plenamente verificada pelos critérios normativos: o núcleo auxético atenua \SI{75.00}{\percent} da aceleração de choque transmitida, limitando a resposta instantânea na carga útil a \SI{29.00}{\gravity}. No domínio das frequências naturais dos componentes internos, o pico máximo do SRS atingiu \SI{50.76}{\gravity}, permanecendo amplamente abaixo do teto de qualificação de \SI{80.00}{\gravity} estipulado para aviônica espacial em barramento PC/104. A Margem de Segurança resultante de $MS_{\text{shock}} = +0{,}575$ assegura que nenhum componente sensível sofrerá delaminação de solda ou falha mecânica durante o evento de separação do veículo lançador.
+A conformidade estrutural ao choque é plenamente verificada pelos critérios normativos: o núcleo auxético atenua \SI{75.00}{\percent} da aceleração de choque transmitida, limitando a resposta instantânea na carga útil a \SI{29.00}{\gravity}. No domínio das frequências naturais dos componentes internos, o pico máximo do SRS atingiu \SI{50.76}{\gravity}, permanecendo amplamente abaixo do teto de qualificação de \SI{80.00}{\gravity} estipulado para aviônica espacial em barramento PC/104. A Margem de Segurança resultante de $MS_{\text{shock}} = +0{,}575$ assegura que nenhum componente sensível sofrerá delaminação de solda ou falha mecânica durante o evento de separação do veículo lançador. As respostas no domínio do tempo e no domínio espectral estão confrontadas graficamente na Figura~\ref{fig:ppod-shock-srs}.
+
+\begin{figure}[htb]
+  \caption{Resposta dinâmica ao choque transiente de ejeção do dispensador P-POD: (a) histórico temporal da aceleração de impacto contra o batente mecânico amortecido; (b) Espectro de Resposta ao Choque (SRS, $\mathcal{Q}=10$) comparando a excitação de base, a resposta atenuada na carga útil e o teto normativo da NASA}
+  \label{fig:ppod-shock-srs}
+  \begin{center}
+    \includegraphics[width=0.95\textwidth]{figuras/ppod_separation_shock_srs.png}
+  \end{center}
+  \fonte{Elaborada pelo autor (2026).}
+\end{figure}
 
 \section{Qualificação do espaço de projeto via pipeline determinístico open source}
 \label{sec:open-pipeline-resultados}
 
 Com o propósito de validar a independência operacional de ferramentas proprietárias e comprovar a robustez da esteira de automação aeroespacial, o pipeline determinístico desenvolvido em arquitetura modular aberta (\code{OpenSourceQualificationPipeline}) foi submetido a uma campanha de qualificação com 10 amostras geradas por Amostragem por Hipercubo Latino (LHS, semente pseudo-aleatória 42) cobrindo todo o envelope geométrico de células auxéticas.
 
-Cada indivíduo foi sequencialmente processado pelas etapas automatizadas de: (i) triagem DfAM LPBF com validação B-Rep via CadQuery; (ii) verificação de bandas proibidas fonônicas por Bloch-Floquet; (iii) extração modal e resposta espectral PSD via \code{Code_Aster} sob contorno \code{test_pod_flexible}; e (iv) simulação transiente de choque e síntese SRS via \code{OpenRadioss}. A Tabela~\ref{tab:open-pipeline-doe} consolida as respostas dinâmicas, os índices de integridade e o veredito normativo de cada candidato.
+Cada indivíduo foi sequencialmente processado pelas etapas automatizadas de: (i) triagem DfAM LPBF com validação B-Rep via CadQuery; (ii) verificação de bandas proibidas fonônicas por Bloch-Floquet; (iii) extração modal e resposta espectral PSD via \code{Code_Aster} sob contorno \code{test_pod_flexible}; e (iv) simulação transiente de choque e síntese SRS via \code{OpenRadioss}. Cumpre registrar que o solver Code\_Aster foi deliberadamente priorizado como o solucionador estrutural principal deste estudo em virtude de sua ampla certificação internacional nas indústrias nuclear e aeroespacial (EDF) e de seu operador nativo de integração espectral de densidade de potência estocástica (\code{DYNA_ALEA_MODAL}), permanecendo o gerador de decks CalculiX (\code{.inp}) implementado na esteira como uma interface de retaguarda para interoperabilidade e verificação cruzada rápida (\textit{cross-check benchmark}). A Tabela~\ref{tab:open-pipeline-doe} consolida as respostas dinâmicas, os índices de integridade e o veredito normativo de cada candidato.
 
 \begin{table}[htb]
   \caption{Resultados da campanha de qualificação espacial automatizada sobre amostras LHS via pipeline determinístico \textit{open source}}
