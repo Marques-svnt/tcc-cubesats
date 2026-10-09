@@ -65,7 +65,7 @@
   - Objetivo Geral destacado;
   - 4 Pilares Específicos:
     1. Parametrização CAD DfAM da célula auxética reentrante em liga AlSi10Mg;
-    2. Automação CAE via Ansys MAPDL (Block Lanczos + PSD GEVS + Fadiga Steinberg);
+    2. Automação CAE via Code_Aster e Gmsh Tet10 em Linux (Sorensen/Lanczos + PSD GEVS + Fadiga Steinberg);
     3. Desenvolvimento de modelo substituto neural *Physics-Guided ResNet*;
     4. Orquestração determinística via LangGraph e otimização multiobjetivo NSGA-II/TOPSIS.
 - **Roteiro de Fala:**
@@ -121,22 +121,22 @@
   - Amostragem DoE por Hipercubo Latino: 250 pontos no espaço 4D ($\theta, t, l, h$);
   - Tabela com limites do DoE e taxa de aprovação preliminar no DfAM (72,4%).
 - **Roteiro de Fala:**
-  > "O fluxo metodológico parte da exploração do espaço geométrico via Amostragem por Hipercubo Latino com semente determinística, gerando 250 combinações paramétricas uniformemente distribuídas. Cada indivíduo passa primeiro pela triagem geométrica dos portões DfAM. Aqueles aprovados avançam para o gerador de scripts APDL paramétricos, que automatiza a construção de malhas tridimensionais, execução modal e análise estocástica no solver Ansys Mechanical."
+  > "O fluxo metodológico parte da exploração do espaço geométrico via Amostragem por Hipercubo Latino com semente determinística, gerando 250 combinações paramétricas uniformemente distribuídas. Cada indivíduo passa primeiro pela triagem geométrica dos portões DfAM. Aqueles aprovados avançam para a esteira automatizada no Gmsh e Code_Aster, gerando malhas tetraédricas de segunda ordem Tet10, executando a extração modal e a análise estocástica espectral sob a norma NASA GEVS."
 
 ---
 
-## Slide 9 — Simulação Numérica de Alta Fidelidade (Ansys MAPDL)
+## Slide 9 — Simulação Numérica de Alta Fidelidade (Code_Aster e Gmsh Tet10)
 - **Título do Slide:** Modelagem em Elementos Finitos e Base de Dados CAE
 - **Tempo Estimado:** 01:30 (07:30 – 09:00)
 - **Conteúdo Visual:**
-  - Malha tridimensional com elementos tetraédricos estruturais quadráticos de 10 nós (`SOLID187`);
-  - Algoritmo Block Lanczos para extração de autovalores e modos normais pré-tensionados;
+  - Malha tridimensional com elementos tetraédricos estruturais quadráticos de 10 nós (`Tet10`);
+  - Algoritmo de Lanczos (Code_Aster CALC_MODES) para extração de autovalores e modos normais pré-tensionados;
   - Estatísticas do dataset gerado (`cubesat_fea_doe_dataset.csv`):
     - Frequência $f_1$: média de $746{,}3\text{ Hz}$ ($572{,}7$ a $1205{,}9\text{ Hz}$);
     - Transmissibilidade média: $T = 0{,}233$ ($> 76\%$ de atenuação);
     - Tensão $3\sigma$ média: $85{,}7\text{ MPa}$; Dano de fadiga médio: $D = 0{,}0061 \ll 0{,}25$.
 - **Roteiro de Fala:**
-  > "As simulações de alta ordem foram conduzidas em elementos finitos SOLID187, ideais para capturar gradientes de tensão nas junções celulares complexas. Cada rodada executa a análise modal por Block Lanczos seguida da resposta espectral à vibração aleatória GEVS. O dataset consolidado de 250 simulações revelou que o núcleo auxético atenuou, em média, mais de 76% da energia vibratória em relação à base excitadora. Porém, cada simulação completa demanda entre 60 e 120 segundos. Avaliar dezenas de milhares de candidatos em um algoritmo evolutivo levaria semanas. Isso motivou o desenvolvimento do nosso metamodelo neural."
+  > "As simulações de alta ordem foram conduzidas em elementos tetraédricos de segunda ordem Tet10 no solver Code_Aster, ideais para capturar gradientes de tensão nas junções celulares complexas. Cada rodada executa a análise modal por Lanczos seguida da resposta espectral à vibração aleatória GEVS. O dataset consolidado de 250 simulações revelou que o núcleo auxético atenuou, em média, mais de 76% da energia vibratória em relação à base excitadora. Porém, cada simulação completa demanda entre 60 e 120 segundos. Avaliar dezenas de milhares de candidatos em um algoritmo evolutivo levaria semanas. Isso motivou o desenvolvimento do nosso metamodelo neural."
 
 ---
 
@@ -162,7 +162,7 @@
   - Métricas estatísticas no conjunto de teste cego ($N=50$):
     - $\overline{R^2} = 0{,}9874$ (acurácia média de $98{,}74\%$); $\text{NRMSE}_{\text{médio}} = 2{,}07\%$;
     - $R^2_{\sigma_{3\sigma}} = 0{,}9989$; $R^2_{T} = 0{,}9981$;
-  - **Latência de Inferência:** $0{,}405\text{ ms}$ por avaliação ($\approx 250.000\times$ mais rápido que o Ansys).
+  - **Latência de Inferência:** $0{,}405\text{ ms}$ por avaliação ($\approx 250.000\times$ mais rápido que o solver de alta fidelidade).
 - **Roteiro de Fala:**
   > "Os resultados do treinamento em 350 épocas foram excepcionais. No conjunto de teste cego, a rede alcançou um R2 médio de 98,74% e erro relativo normalizado de apenas 2%. Em tensão de pico e transmissibilidade, o R2 superou 99,8%. O tempo de inferência obtido foi de apenas 0,405 milissegundos por avaliação. Ou seja, o que o solver de elementos finitos levava até dois minutos para calcular, a rede calcula mais de 2.400 vezes por segundo, permitindo viabilizar campanhas evolutivas de larga escala."
 
@@ -192,7 +192,7 @@
   - Critério de Dominação com Restrições de Deb (*Deb's Constrained Domination*);
   - Campanha: 100 indivíduos $\times$ 100 gerações = **10.000 avaliações executadas em 4,82 segundos**.
 - **Roteiro de Fala:**
-  > "Acoplamos o modelo neural substituto ao algoritmo genético NSGA-II para resolver o problema multiobjetivo de minimizar simultaneamente a massa e a transmissibilidade da carga útil. Adotamos o critério de dominação restrita de Deb, onde indivíduos viáveis dominam inviáveis e soluções inviáveis são ordenadas pela menor violação de restrições normativas. Graças à aceleração neural, executamos 10.000 avaliações de candidatos em apenas 4,82 segundos — um processo que exigiria 277 horas ininterruptas de simulação no Ansys."
+  > "Acoplamos o modelo neural substituto ao algoritmo genético NSGA-II para resolver o problema multiobjetivo de minimizar simultaneamente a massa e a transmissibilidade da carga útil. Adotamos o critério de dominação restrita de Deb, onde indivíduos viáveis dominam inviáveis e soluções inviáveis são ordenadas pela menor violação de restrições normativas. Graças à aceleração neural, executamos 10.000 avaliações de candidatos em apenas 4,82 segundos — um processo que exigiria 277 horas ininterruptas de simulação numérica de alta fidelidade no Code_Aster."
 
 ---
 
@@ -243,7 +243,7 @@
 | **Dano de Fadiga ($D$)** | $0{,}0543$ | $0{,}0458$ | $+18{,}56\%$ | $\le 0{,}25$ | **Aprovado** |
 
 - **Roteiro de Fala:**
-  > "Para homologar o resultado, reconstruímos a geometria tridimensional do Design #28 e a reanalisamos em alta fidelidade no Ansys MAPDL. A concordância foi extraordinária: o erro relativo na tensão de pico foi de apenas 0,99% (168,57 MPa predito contra 166,91 MPa real), ambas seguras frente ao limite admissível de 184 MPa. A transmissibilidade foi idêntica até a quarta casa decimal, com erro de 0,008%. A frequência fundamental real foi de 579,6 Hz — quase seis vezes acima do patamar da NASA — e o dano de fadiga de 0,046 garante uma vida útil cinco vezes superior aos 120 segundos do lançamento."
+  > "Para homologar o resultado, reconstruímos a geometria tridimensional do Design #28 e a reanalisamos em alta fidelidade no Code_Aster (Ground Truth). A concordância foi extraordinária: o erro relativo na tensão de pico foi de apenas 0,99% (168,57 MPa predito contra 166,91 MPa real), ambas seguras frente ao limite admissível de 184 MPa. A transmissibilidade foi idêntica até a quarta casa decimal, com erro de 0,008%. A frequência fundamental real foi de 579,6 Hz — quase seis vezes acima do patamar da NASA — e o dano de fadiga de 0,046 garante uma vida útil cinco vezes superior aos 120 segundos do lançamento."
 
 ---
 
