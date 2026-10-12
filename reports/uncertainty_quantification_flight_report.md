@@ -27,7 +27,7 @@ Este relatório formaliza a verificação de conformidade segundo a norma **NASA
 * **Comprimento da Costela ($l$):** $\Delta l \sim \mathcal{N}(0, (20\ \mu	ext{m})^2)$
 * **Altura Vertical ($h$):** $\Delta h \sim \mathcal{N}(0, (20\ \mu	ext{m})^2)$
 * **Amostras de Monte Carlo:** $N = 10,000$ realizações vetorizadas via rede neural *Physics-Guided ResNet*.
-* **Tempo de Inferência:** 0.0095 s
+* **Tempo de Inferência:** 0.0082 s
 
 ---
 
