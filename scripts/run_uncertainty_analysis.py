@@ -296,8 +296,12 @@ def run_full_uncertainty_pipeline() -> dict[str, Any]:
     md_path = root_dir / "reports" / "uncertainty_quantification_flight_report.md"
     generate_markdown_report(synthesis_data, md_path)
 
-    # 3. Export LaTeX table for Monograph
-    tex_path = root_dir / "monografia" / "04-figuras" / "tab_uncertainty_quantification.tex"
+    # 3. Export LaTeX table for Monograph (if present) or reports
+    mono_fig_dir = root_dir / "monografia" / "04-figuras"
+    if mono_fig_dir.exists():
+        tex_path = mono_fig_dir / "tab_uncertainty_quantification.tex"
+    else:
+        tex_path = root_dir / "reports" / "tab_uncertainty_quantification.tex"
     generate_latex_table(evaluated_candidates, tex_path)
 
     return {

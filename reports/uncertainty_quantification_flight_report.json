@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "timestamp_utc": "2026-10-12T20:09:25.058659+00:00",
+    "timestamp_utc": "2026-10-12T20:14:00.535956+00:00",
     "standard": "NASA GSFC-STD-7000A / ASME V&V 10",
     "material": "AlSi10Mg L-PBF Stress Relieved",
     "monte_carlo_draws": 10000
@@ -95,7 +95,7 @@
         "prob_ms_yield_positive": 0.1875,
         "prob_ms_ultimate_positive": 1.0,
         "prob_fatigue_qualified": 1.0,
-        "execution_time_sec": 0.008249999002146069
+        "execution_time_sec": 0.007601311001053546
       }
     },
     {
@@ -181,7 +181,7 @@
         "prob_ms_yield_positive": 1.0,
         "prob_ms_ultimate_positive": 1.0,
         "prob_fatigue_qualified": 1.0,
-        "execution_time_sec": 0.012033385999529855
+        "execution_time_sec": 0.008473680001770845
       }
     },
     {
@@ -267,7 +267,7 @@
         "prob_ms_yield_positive": 1.0,
         "prob_ms_ultimate_positive": 1.0,
         "prob_fatigue_qualified": 1.0,
-        "execution_time_sec": 0.008900513999833493
+        "execution_time_sec": 0.008875624000211246
       }
     }
   ]
