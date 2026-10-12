@@ -85,6 +85,7 @@ Material: AlSi10Mg LPBF (E=68 GPa, nu=0.33, rho=2680 kg/m3)
 """
         else:
             inp_content += """N_BOTTOM, 3, 3, 0.0
+N_RAILS, 1, 2, 0.0
 """
         inp_content += """*NODE FILE
 U

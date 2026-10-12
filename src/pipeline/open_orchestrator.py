@@ -278,4 +278,5 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
     pipe = OpenSourceQualificationPipeline()
     res = pipe.run_pipeline(num_samples=10)
-    print(f"Evaluated {len(res)} candidates.")
+    logger.info("Evaluated %d candidates.", len(res))
+

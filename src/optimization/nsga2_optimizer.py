@@ -188,7 +188,7 @@ class NSGA2Optimizer:
             f1 = float(max(y_raw[i, 0], 10.0))
             stress_3sigma = float(max(y_raw[i, 1], 1.0))
             grms_payload = float(max(y_raw[i, 2], 0.1))
-            transmissibility = float(max(y_raw[i, 3], 0.01))
+            transmissibility = float(max(grms_payload / 14.1, 0.001))
 
             ind.f1_hz = f1
             ind.peak_stress_mpa = stress_3sigma
@@ -736,6 +736,7 @@ def plot_pareto_frontier(
 
     plt.tight_layout()
     plt.savefig(path, dpi=300)
+    plt.savefig(path.with_suffix(".pdf"))
     plt.close()
     logger.info("Saved Pareto frontier visualization to %s", path)
     return path

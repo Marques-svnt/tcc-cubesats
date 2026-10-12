@@ -6,15 +6,22 @@ accumulation (NASA-HDBK-7005), and aerospace margins of safety.
 """
 
 import logging
-import math
-from typing import Dict, Tuple
+
+from src.core.settings import get_settings
 
 logger = logging.getLogger(__name__)
+
+_SETTINGS = get_settings()
+_DEFAULT_SOLID_MODULUS_GPA: float = _SETTINGS.alsi10mg.material.young_modulus_gpa
+_DEFAULT_DURATION_SECONDS: float = _SETTINGS.gevs.general.duration_per_axis_seconds
+_DEFAULT_BASQUIN_M: float = _SETTINGS.alsi10mg.fatigue_properties.basquin_exponent_m
+_DEFAULT_BASQUIN_C: float = _SETTINGS.alsi10mg.fatigue_properties.basquin_constant_c
+_DEFAULT_ALLOWABLE_STRESS_MPA: float = _SETTINGS.alsi10mg.safety_factors.allowable_stress_yield_mpa
 
 
 def calculate_gibson_ashby_modulus(
     relative_density: float,
-    solid_modulus_gpa: float = 68.0,
+    solid_modulus_gpa: float = _DEFAULT_SOLID_MODULUS_GPA,
     constant_c: float = 1.0,
     exponent_n: float = 2.0,
 ) -> float:
@@ -46,16 +53,16 @@ def calculate_gibson_ashby_modulus(
         effective_modulus,
         relative_density,
     )
-    return effective_modulus
+    return float(effective_modulus)
 
 
 def calculate_steinberg_fatigue_damage(
     f_natural_hz: float,
     peak_3sigma_stress_mpa: float,
-    duration_seconds: float = 120.0,
-    basquin_m: float = 6.8,
-    basquin_c: float = 1.2e20,
-) -> Tuple[float, Dict[str, float]]:
+    duration_seconds: float = _DEFAULT_DURATION_SECONDS,
+    basquin_m: float = _DEFAULT_BASQUIN_M,
+    basquin_c: float = _DEFAULT_BASQUIN_C,
+) -> tuple[float, dict[str, float]]:
     """Calculates cumulative fatigue damage under random vibration using Steinberg's 3-band method.
 
     According to NASA-HDBK-7005 and Steinberg (2000), Gaussian random stress is divided into:
@@ -127,7 +134,7 @@ def calculate_steinberg_fatigue_damage(
 
 def calculate_margin_of_safety(
     applied_stress_mpa: float,
-    allowable_stress_mpa: float,
+    allowable_stress_mpa: float = _DEFAULT_ALLOWABLE_STRESS_MPA,
 ) -> float:
     """Calculates standard aerospace Margin of Safety (MS).
 
@@ -153,3 +160,40 @@ def calculate_margin_of_safety(
         applied_stress_mpa,
     )
     return margin
+
+
+def calculate_ultimate_margin_of_safety(
+    applied_stress_mpa: float,
+    ultimate_strength_mpa: float = 340.0,
+    safety_factor_ultimate: float = 1.40,
+) -> float:
+    """Calculates structural Margin of Safety against tensile ultimate failure (NASA-STD-5020B).
+
+    MS_ult = (sigma_ult / (FS_ult * sigma_3sigma)) - 1.0
+
+    Args:
+        applied_stress_mpa: Peak stochastic von Mises stress (3-sigma) in MPa.
+        ultimate_strength_mpa: Material tensile ultimate strength (340.0 MPa for AlSi10Mg).
+        safety_factor_ultimate: NASA qualification factor of safety for ultimate (1.40).
+
+    Returns:
+        Margin of Safety against ultimate rupture (scalar, must be > 0.0).
+
+    Raises:
+        ValueError: If applied stress or material strength is non-positive.
+    """
+    if applied_stress_mpa <= 0.0:
+        raise ValueError("Applied stress must be strictly positive.")
+    if ultimate_strength_mpa <= 0.0 or safety_factor_ultimate <= 0.0:
+        raise ValueError("Ultimate strength and safety factor must be positive.")
+
+    allowable_ult_mpa = ultimate_strength_mpa / safety_factor_ultimate
+    margin_ult = (allowable_ult_mpa / applied_stress_mpa) - 1.0
+    logger.debug(
+        "Ultimate Margin of Safety: MS_ult=%.3f (Allowable=%.2f, Applied=%.2f)",
+        margin_ult,
+        allowable_ult_mpa,
+        applied_stress_mpa,
+    )
+    return margin_ult
+

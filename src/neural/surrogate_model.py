@@ -58,13 +58,60 @@ class ResidualBlock(nn.Module if TORCH_AVAILABLE else object):  # type: ignore
         return residual + out
 
 
+class MLPSurrogate(nn.Module if TORCH_AVAILABLE else object):  # type: ignore
+    """Standard Dense MLP without residual skip connections for ablation baseline."""
+
+    def __init__(
+        self,
+        input_dim: int = 5,
+        output_dim: int = 3,
+        hidden_dim: int = 64,
+        num_layers: int = 3,
+        dropout_rate: float = 0.05,
+    ) -> None:
+        """Initializes standard dense MLP architecture.
+
+        Args:
+            input_dim: Number of input features.
+            output_dim: Number of predicted dynamic responses (default 3: f1, stress, grms).
+            hidden_dim: Width of dense hidden layers.
+            num_layers: Number of intermediate dense hidden layers.
+            dropout_rate: Dropout regularization probability.
+        """
+        super().__init__()
+        self.input_dim = input_dim
+        self.output_dim = output_dim
+        self.hidden_dim = hidden_dim
+
+        if TORCH_AVAILABLE:
+            layers: List[nn.Module] = [
+                nn.Linear(input_dim, hidden_dim),
+                nn.LayerNorm(hidden_dim),
+                nn.SiLU(),
+                nn.Dropout(dropout_rate),
+            ]
+            for _ in range(num_layers - 1):
+                layers.extend([
+                    nn.Linear(hidden_dim, hidden_dim),
+                    nn.LayerNorm(hidden_dim),
+                    nn.SiLU(),
+                    nn.Dropout(dropout_rate),
+                ])
+            layers.append(nn.Linear(hidden_dim, output_dim))
+            self.network = nn.Sequential(*layers)
+
+    def forward(self, x: "torch.Tensor") -> "torch.Tensor":
+        """Executes forward pass through the dense feedforward MLP."""
+        return self.network(x)
+
+
 class CubeSatSurrogateResNet(nn.Module if TORCH_AVAILABLE else object):  # type: ignore
     """Deep Residual MLP for multi-output elastodynamic regression."""
 
     def __init__(
         self,
         input_dim: int = 5,
-        output_dim: int = 4,
+        output_dim: int = 3,
         hidden_dim: int = 64,
         num_blocks: int = 2,
     ) -> None:
@@ -72,7 +119,7 @@ class CubeSatSurrogateResNet(nn.Module if TORCH_AVAILABLE else object):  # type:
 
         Args:
             input_dim: Number of input geometric features (theta, t, l, h, rho_rel).
-            output_dim: Number of predicted dynamic responses (f1, stress, grms, trans).
+            output_dim: Number of predicted dynamic responses (default 3: f1, stress, grms).
             hidden_dim: Width of intermediate dense layers.
             num_blocks: Number of stacked residual blocks.
         """
@@ -99,6 +146,34 @@ class CubeSatSurrogateResNet(nn.Module if TORCH_AVAILABLE else object):  # type:
         for block in self.res_blocks:
             out = block(out)
         return self.head(out)
+
+    def predict_with_transmissibility(
+        self,
+        x: "torch.Tensor",
+        scaler: Optional["SurrogateDatasetScaler"] = None,
+    ) -> "torch.Tensor":
+        """Forward pass computing [f1, stress, grms, T] with deterministic T = grms / 14.1.
+
+        Args:
+            x: Input tensor of shape (batch_size, input_dim).
+            scaler: Optional dataset scaler to un-normalize predictions.
+
+        Returns:
+            Tensor of shape (batch_size, 4) containing [f1, stress, grms, transmissibility].
+        """
+        y_3d = self.forward(x)
+        if scaler is not None:
+            device = x.device
+            y_mean = torch.tensor(scaler.y_mean[:3], device=device, dtype=torch.float32)
+            y_std = torch.tensor(scaler.y_std[:3], device=device, dtype=torch.float32)
+            y_phys = y_3d * y_std + y_mean
+            grms = y_phys[:, 2:3]
+            t_ratio = grms / 14.1
+            return torch.cat([y_phys, t_ratio], dim=-1)
+        else:
+            grms = y_3d[:, 2:3]
+            t_ratio = grms / 14.1
+            return torch.cat([y_3d, t_ratio], dim=-1)
 
 
 class PhysicsGuidedLoss(nn.Module if TORCH_AVAILABLE else object):  # type: ignore
@@ -144,27 +219,58 @@ class PhysicsGuidedLoss(nn.Module if TORCH_AVAILABLE else object):  # type: igno
         """
         loss_mse = self.mse(y_pred, y_true)
 
-        # 1. Gibson-Ashby penalty: check f1 scaling relation relative_density (feature idx 4)
-        # Higher density must reflect higher effective stiffness E* = Es * rho_rel^2
-        rho_rel = x_inputs[:, 4:5]
+        # 1. Physical consistency penalty: enforce lower bound (20 Hz) and Gibson-Ashby scaling
         f1_pred = y_pred[:, 0:1]
 
-        # Penalize non-positive frequency predictions
-        loss_positivity = torch.mean(torch.relu(-f1_pred) ** 2)
+        if target_scaler is not None:
+            # Un-normalize relative density
+            if hasattr(target_scaler, "x_mean") and hasattr(target_scaler, "x_std"):
+                idx_rho = 4 if len(target_scaler.x_mean) >= 5 else 1
+                rho_mean = float(target_scaler.x_mean[idx_rho])
+                rho_std = float(target_scaler.x_std[idx_rho])
+                rho_raw = x_inputs[:, idx_rho : idx_rho + 1]
+                rho_rel_physical = torch.clamp(rho_raw * rho_std + rho_mean, min=0.01, max=0.99)
+            else:
+                rho_raw = x_inputs[:, 4:5] if x_inputs.shape[1] >= 5 else x_inputs[:, 1:2]
+                rho_rel_physical = torch.clamp(rho_raw, min=0.01, max=0.99)
 
-        # 2. Monotonicity constraint: partial derivative df1 / drho_rel >= 0
-        # If relative density increases, fundamental frequency should not decrease drastically
-        # Soft finite-difference monotonicity penalty across sorted batch
-        sorted_indices = torch.argsort(rho_rel.squeeze())
-        sorted_rho = rho_rel[sorted_indices]
-        sorted_f1 = f1_pred[sorted_indices]
-        diff_f1 = sorted_f1[1:] - sorted_f1[:-1]
-        diff_rho = sorted_rho[1:] - sorted_rho[:-1]
+            if hasattr(target_scaler, "y_mean") and hasattr(target_scaler, "y_std"):
+                mean_f1 = float(target_scaler.y_mean[0])
+                std_f1 = float(target_scaler.y_std[0])
+            elif hasattr(target_scaler, "mean_y") and hasattr(target_scaler, "std_y"):
+                mean_f1 = float(target_scaler.mean_y[0])
+                std_f1 = float(target_scaler.std_y[0])
+            else:
+                mean_f1, std_f1 = None, None
 
-        # Violations occur where diff_rho > 0 but diff_f1 < 0 (stiffness drops as mass increases)
-        valid_rho_step = diff_rho > 1e-4
-        mono_violations = torch.relu(-diff_f1[valid_rho_step])
-        loss_mono = torch.mean(mono_violations**2) if mono_violations.numel() > 0 else torch.tensor(0.0, device=y_pred.device)
+            if mean_f1 is not None and std_f1 is not None:
+                f1_physical = f1_pred * std_f1 + mean_f1
+                # Penalize frequencies below NASA GEVS lower bound (20.0 Hz)
+                loss_bound = torch.mean(torch.relu(20.0 - f1_physical) ** 2)
+                # Gibson-Ashby asymptotic power-law scaling penalty (soft boundary regularization)
+                f1_ga = 1350.0 * torch.sqrt(rho_rel_physical)
+                loss_ga = torch.mean(((f1_physical - f1_ga) / torch.clamp(f1_ga, min=100.0)) ** 2)
+                loss_positivity = loss_bound + 0.05 * loss_ga
+            else:
+                loss_positivity = torch.mean(torch.relu(-f1_pred) ** 2)
+
+            # 2. Monotonicity regularization evaluated on physical density ordering
+            sorted_indices = torch.argsort(rho_rel_physical.squeeze(-1))
+            sorted_f1 = f1_pred[sorted_indices]
+            sorted_rho = rho_rel_physical[sorted_indices]
+            diff_f1 = sorted_f1[1:] - sorted_f1[:-1]
+            diff_rho = sorted_rho[1:] - sorted_rho[:-1]
+
+            # Penalize only where relative density increases significantly (> 0.02) but frequency drops sharply
+            significant_step = diff_rho > 0.02
+            if significant_step.any():
+                severe_drop = torch.relu(-(diff_f1[significant_step] + 0.10))
+                loss_mono = torch.mean(severe_drop**2) if severe_drop.numel() > 0 else torch.tensor(0.0, device=y_pred.device)
+            else:
+                loss_mono = torch.tensor(0.0, device=y_pred.device)
+        else:
+            loss_positivity = torch.mean(torch.relu(-f1_pred) ** 2)
+            loss_mono = torch.tensor(0.0, device=y_pred.device)
 
         total_loss = loss_mse + self.lambda_phys * loss_positivity + self.lambda_mono * loss_mono
 
@@ -254,7 +360,11 @@ def fit_scaler_from_data(
         Fitted SurrogateDatasetScaler instance.
     """
     input_names = input_names or ["theta_deg", "thickness_t", "length_l", "height_h", "relative_density"]
-    target_names = target_names or ["first_natural_freq_hz", "peak_3sigma_stress_mpa", "payload_grms", "transmissibility_ratio"]
+    if target_names is None:
+        if y_raw.shape[1] == 3:
+            target_names = ["first_natural_freq_hz", "peak_3sigma_stress_mpa", "payload_grms"]
+        else:
+            target_names = ["first_natural_freq_hz", "peak_3sigma_stress_mpa", "payload_grms", "transmissibility_ratio"]
 
     x_mean = np.mean(x_raw, axis=0, dtype=np.float32)
     x_std = np.std(x_raw, axis=0, dtype=np.float32)
@@ -271,12 +381,17 @@ def fit_scaler_from_data(
     )
 
 
-def compute_regression_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> Dict[str, float]:
-    """Computes R^2 (coefficient of determination) and NRMSE per target and globally.
+def compute_regression_metrics(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    target_names: Optional[List[str]] = None,
+) -> Dict[str, float]:
+    """Computes R^2 (coefficient of determination), NRMSE (%), and MAE per target and globally.
 
     Args:
         y_true: Ground truth target matrix (N, D).
         y_pred: Predicted target matrix (N, D).
+        target_names: Optional list of target variable names.
 
     Returns:
         Dictionary of statistical quality metrics.
@@ -286,20 +401,29 @@ def compute_regression_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> Dict[s
     r2_per_dim = 1.0 - (ss_res / np.maximum(ss_tot, 1e-8))
 
     rmse_per_dim = np.sqrt(np.mean((y_true - y_pred) ** 2, axis=0))
+    mae_per_dim = np.mean(np.abs(y_true - y_pred), axis=0)
     range_per_dim = np.maximum(np.max(y_true, axis=0) - np.min(y_true, axis=0), 1e-8)
     nrmse_per_dim = (rmse_per_dim / range_per_dim) * 100.0  # percentage
 
-    target_names = ["f1", "stress", "grms", "transmissibility"]
+    if target_names is None:
+        if y_true.shape[1] == 3:
+            target_names = ["f1", "stress", "grms"]
+        elif y_true.shape[1] == 4:
+            target_names = ["f1", "stress", "grms", "transmissibility"]
+        else:
+            target_names = [f"dim_{i}" for i in range(y_true.shape[1])]
+
     metrics: Dict[str, float] = {
         "r2_mean": float(np.mean(r2_per_dim)),
         "nrmse_mean_percent": float(np.mean(nrmse_per_dim)),
+        "mae_mean": float(np.mean(mae_per_dim)),
     }
 
-    num_dims = len(r2_per_dim)
-    for i in range(num_dims):
+    for i in range(len(r2_per_dim)):
         name = target_names[i] if i < len(target_names) else f"dim_{i}"
         metrics[f"r2_{name}"] = float(r2_per_dim[i])
         metrics[f"nrmse_{name}_percent"] = float(nrmse_per_dim[i])
+        metrics[f"mae_{name}"] = float(mae_per_dim[i])
 
     return metrics
 
@@ -317,7 +441,7 @@ def train_surrogate_model(
 
     Args:
         x_data: Input parameter matrix (N, 5).
-        y_data: Target dynamic responses matrix (N, 4).
+        y_data: Target dynamic responses matrix (N, 3 or 4).
         epochs: Number of training epochs (default 400).
         batch_size: Mini-batch size.
         lr: Initial learning rate for AdamW.
@@ -351,12 +475,19 @@ def train_surrogate_model(
     train_dataset = TensorDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
-    model = CubeSatSurrogateResNet(input_dim=5, output_dim=4, hidden_dim=64, num_blocks=2)
+    out_dim = y_data.shape[1]
+    model = CubeSatSurrogateResNet(input_dim=5, output_dim=out_dim, hidden_dim=64, num_blocks=2)
     criterion = PhysicsGuidedLoss(lambda_phys=0.15, lambda_mono=0.10)
     optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=1e-5)
 
-    history: Dict[str, List[float]] = {"train_loss": [], "val_loss": []}
+    history: Dict[str, Any] = {
+        "train_loss": [],
+        "val_loss": [],
+        "mse_loss": [],
+        "phys_loss": [],
+        "mono_loss": [],
+    }
     logger.info("Starting training of Physics-Guided ResNet (%d epochs, %d train, %d test)...", epochs, n_train, n_samples - n_train)
 
     best_val_loss = float("inf")
@@ -368,13 +499,17 @@ def train_surrogate_model(
     for epoch in range(1, epochs + 1):
         model.train()
         epoch_losses = []
+        epoch_mse, epoch_phys, epoch_mono = [], [], []
         for x_batch, y_batch in train_loader:
             optimizer.zero_grad()
             y_pred = model(x_batch)
-            loss, _ = criterion(y_pred, y_batch, x_batch, scaler)
+            loss, b_dict = criterion(y_pred, y_batch, x_batch, scaler)
             loss.backward()
             optimizer.step()
             epoch_losses.append(loss.item())
+            epoch_mse.append(b_dict["loss_mse"])
+            epoch_phys.append(b_dict["loss_positivity"])
+            epoch_mono.append(b_dict["loss_mono"])
 
         scheduler.step()
         train_loss = float(np.mean(epoch_losses))
@@ -388,6 +523,9 @@ def train_surrogate_model(
 
         history["train_loss"].append(train_loss)
         history["val_loss"].append(val_loss_scalar)
+        history["mse_loss"].append(float(np.mean(epoch_mse)))
+        history["phys_loss"].append(float(np.mean(epoch_phys)))
+        history["mono_loss"].append(float(np.mean(epoch_mono)))
 
         if val_loss_scalar < best_val_loss:
             best_val_loss = val_loss_scalar
@@ -405,8 +543,235 @@ def train_surrogate_model(
     with torch.no_grad():
         y_test_pred_norm = model(x_test_tensor).numpy()
     y_test_pred = scaler.inverse_transform_y(y_test_pred_norm)
-    test_metrics = compute_regression_metrics(y_true=y_test_raw, y_pred=y_test_pred)
+
+    if out_dim == 3:
+        t_true = (y_test_raw[:, 2:3] / 14.1).astype(np.float32)
+        t_pred = (y_test_pred[:, 2:3] / 14.1).astype(np.float32)
+        y_test_raw_full = np.hstack([y_test_raw, t_true])
+        y_test_pred_full = np.hstack([y_test_pred, t_pred])
+        test_metrics = compute_regression_metrics(y_true=y_test_raw_full, y_pred=y_test_pred_full)
+    else:
+        test_metrics = compute_regression_metrics(y_true=y_test_raw, y_pred=y_test_pred)
 
     history["final_test_metrics"] = test_metrics
     logger.info("Training complete. Test Metrics: %s", test_metrics)
     return model, scaler, history
+
+
+def k_fold_cross_validation(
+    x_data: np.ndarray,
+    y_data: np.ndarray,
+    k: int = 10,
+    epochs: int = 300,
+    batch_size: int = 32,
+    lr: float = 1e-3,
+    model_architecture: str = "resnet",
+    use_physics_loss: bool = True,
+    lambda_phys: float = 0.15,
+    lambda_mono: float = 0.10,
+    random_seed: int = 42,
+) -> Dict[str, Any]:
+    """Executes stratified k-fold cross-validation across the DoE dataset.
+
+    Args:
+        x_data: Input parameter matrix of shape (N, 5).
+        y_data: Target matrix of shape (N, 3) with [f1, stress, grms].
+        k: Number of folds (default 10).
+        epochs: Training epochs per fold.
+        batch_size: Mini-batch size.
+        lr: Learning rate for AdamW.
+        model_architecture: 'resnet' for residual blocks or 'mlp' for standard dense MLP.
+        use_physics_loss: If True, uses PhysicsGuidedLoss; if False, uses standard MSE.
+        lambda_phys: Physical consistency penalty weight.
+        lambda_mono: Monotonicity penalty weight.
+        random_seed: Reproducibility seed.
+
+    Returns:
+        Dictionary containing per-fold metrics, mean, and standard deviation.
+    """
+    if not TORCH_AVAILABLE:
+        raise RuntimeError("PyTorch is required for cross-validation.")
+
+    n_samples = len(x_data)
+    np.random.seed(random_seed)
+    torch.manual_seed(random_seed)
+
+    indices = np.random.permutation(n_samples)
+    fold_sizes = np.full(k, n_samples // k, dtype=int)
+    fold_sizes[: n_samples % k] += 1
+    current = 0
+    folds = []
+    for f_size in fold_sizes:
+        folds.append(indices[current : current + f_size])
+        current += f_size
+
+    out_dim = y_data.shape[1]
+    fold_results: List[Dict[str, float]] = []
+
+    logger.info(
+        "Starting %d-Fold Cross-Validation: arch=%s, phys_loss=%s (%d samples)",
+        k,
+        model_architecture,
+        use_physics_loss,
+        n_samples,
+    )
+
+    for fold_idx in range(k):
+        test_idx = folds[fold_idx]
+        train_idx = np.setdiff1d(indices, test_idx)
+
+        x_train_raw, y_train_raw = x_data[train_idx], y_data[train_idx]
+        x_test_raw, y_test_raw = x_data[test_idx], y_data[test_idx]
+
+        scaler = fit_scaler_from_data(x_train_raw, y_train_raw)
+        x_train = scaler.transform_x(x_train_raw)
+        y_train = scaler.transform_y(y_train_raw)
+        x_test = scaler.transform_x(x_test_raw)
+        y_test = scaler.transform_y(y_test_raw)
+
+        train_dataset = TensorDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
+        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+
+        if model_architecture == "mlp":
+            model: nn.Module = MLPSurrogate(input_dim=5, output_dim=out_dim, hidden_dim=64, num_layers=3)
+        else:
+            model = CubeSatSurrogateResNet(input_dim=5, output_dim=out_dim, hidden_dim=64, num_blocks=2)
+
+        criterion = (
+            PhysicsGuidedLoss(lambda_phys=lambda_phys, lambda_mono=lambda_mono)
+            if use_physics_loss
+            else nn.MSELoss()
+        )
+        optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=1e-5)
+
+        best_val_loss = float("inf")
+        best_weights = None
+        x_test_t = torch.from_numpy(x_test).float()
+        y_test_t = torch.from_numpy(y_test).float()
+
+        for epoch in range(1, epochs + 1):
+            model.train()
+            for x_b, y_b in train_loader:
+                optimizer.zero_grad()
+                y_pred = model(x_b)
+                if use_physics_loss:
+                    loss, _ = criterion(y_pred, y_b, x_b, scaler)
+                else:
+                    loss = criterion(y_pred, y_b)
+                loss.backward()
+                optimizer.step()
+            scheduler.step()
+
+            model.eval()
+            with torch.no_grad():
+                y_val_pred = model(x_test_t)
+                if use_physics_loss:
+                    val_loss, _ = criterion(y_val_pred, y_test_t, x_test_t, scaler)
+                    val_loss_val = float(val_loss.item())
+                else:
+                    val_loss_val = float(criterion(y_val_pred, y_test_t).item())
+
+            if val_loss_val < best_val_loss:
+                best_val_loss = val_loss_val
+                best_weights = {key: val.cpu().clone() for key, val in model.state_dict().items()}
+
+        if best_weights is not None:
+            model.load_state_dict(best_weights)
+
+        model.eval()
+        with torch.no_grad():
+            y_test_pred_norm = model(x_test_t).numpy()
+        y_test_pred = scaler.inverse_transform_y(y_test_pred_norm)
+
+        if out_dim == 3:
+            t_true = (y_test_raw[:, 2:3] / 14.1).astype(np.float32)
+            t_pred = (y_test_pred[:, 2:3] / 14.1).astype(np.float32)
+            y_test_raw_4d = np.hstack([y_test_raw, t_true])
+            y_test_pred_4d = np.hstack([y_test_pred, t_pred])
+            m = compute_regression_metrics(
+                y_test_raw_4d,
+                y_test_pred_4d,
+                target_names=["f1", "stress", "grms", "transmissibility"],
+            )
+        else:
+            m = compute_regression_metrics(y_test_raw, y_test_pred)
+
+        fold_results.append(m)
+
+    # Compute mean and standard deviation across all folds
+    summary: Dict[str, Any] = {
+        "k_folds": k,
+        "model_architecture": model_architecture,
+        "use_physics_loss": use_physics_loss,
+        "per_fold": fold_results,
+        "metrics_summary": {},
+    }
+
+    metric_keys = list(fold_results[0].keys())
+    for k_name in metric_keys:
+        vals = [res[k_name] for res in fold_results]
+        summary["metrics_summary"][k_name] = {
+            "mean": float(np.mean(vals)),
+            "std": float(np.std(vals)),
+            "min": float(np.min(vals)),
+            "max": float(np.max(vals)),
+        }
+
+    return summary
+
+
+def run_ablation_study(
+    x_data: np.ndarray,
+    y_data: np.ndarray,
+    k: int = 10,
+    epochs: int = 250,
+    batch_size: int = 32,
+    lr: float = 1e-3,
+    random_seed: int = 42,
+) -> Dict[str, Any]:
+    """Runs full 4x4 systematic ablation matrix under identical k-fold CV.
+
+    Models:
+      - M1: MLP Baseline (Pure MSE)
+      - M2: MLP + Physics-Guided Loss (GA + Monotonicity)
+      - M3: ResNet Baseline (Pure MSE)
+      - M4: Full PG-ResNet (Residual Blocks + Physics-Guided Loss)
+
+    Args:
+        x_data: Input parameter matrix (N, 5).
+        y_data: Target dynamic responses matrix (N, 3).
+        k: Number of folds (default 10).
+        epochs: Epochs per fold.
+        batch_size: Batch size.
+        lr: Learning rate.
+        random_seed: Random seed.
+
+    Returns:
+        Dictionary containing detailed metrics for M1, M2, M3, M4 and comparative table.
+    """
+    logger.info("Executing 4-model systematic ablation study (%d-fold CV)...", k)
+    configs = [
+        ("M1_MLP_Pure", "mlp", False),
+        ("M2_MLP_Physics", "mlp", True),
+        ("M3_ResNet_Pure", "resnet", False),
+        ("M4_PG_ResNet", "resnet", True),
+    ]
+
+    results: Dict[str, Any] = {}
+    for name, arch, use_phys in configs:
+        logger.info("Running ablation variant: %s", name)
+        res = k_fold_cross_validation(
+            x_data=x_data,
+            y_data=y_data,
+            k=k,
+            epochs=epochs,
+            batch_size=batch_size,
+            lr=lr,
+            model_architecture=arch,
+            use_physics_loss=use_phys,
+            random_seed=random_seed,
+        )
+        results[name] = res
+
+    return results

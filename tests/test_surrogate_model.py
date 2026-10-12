@@ -8,6 +8,7 @@ import numpy as np
 import torch
 from src.neural.surrogate_model import (
     CubeSatSurrogateResNet,
+    MLPSurrogate,
     PhysicsGuidedLoss,
     SurrogateDatasetScaler,
     compute_regression_metrics,
@@ -17,14 +18,32 @@ from src.neural.surrogate_model import (
 
 def test_surrogate_resnet_architecture_and_forward() -> None:
     """Verifies tensor shapes and forward pass through residual layers."""
-    model = CubeSatSurrogateResNet(input_dim=5, output_dim=4, hidden_dim=64, num_blocks=2)
+    model = CubeSatSurrogateResNet(input_dim=5, output_dim=3, hidden_dim=64, num_blocks=2)
     batch_size = 12
     x = torch.randn(batch_size, 5)
 
     y = model(x)
-    assert y.shape == (batch_size, 4)
+    assert y.shape == (batch_size, 3)
     assert not torch.isnan(y).any()
     assert not torch.isinf(y).any()
+
+    # Test predict_with_transmissibility
+    y_full = model.predict_with_transmissibility(x)
+    assert y_full.shape == (batch_size, 4)
+    # Check that T == Grms / 14.1
+    grms = y_full[:, 2]
+    t_ratio = y_full[:, 3]
+    assert torch.allclose(t_ratio, grms / 14.1, atol=1e-5)
+
+
+def test_mlp_surrogate_architecture_and_forward() -> None:
+    """Verifies forward pass through standard dense MLP."""
+    mlp = MLPSurrogate(input_dim=5, output_dim=3, hidden_dim=64, num_layers=3)
+    batch_size = 8
+    x = torch.randn(batch_size, 5)
+    y = mlp(x)
+    assert y.shape == (batch_size, 3)
+    assert not torch.isnan(y).any()
 
 
 def test_physics_guided_loss_components() -> None:

@@ -49,7 +49,7 @@ def get_surrogate_artifacts() -> Tuple[CubeSatSurrogateResNet, SurrogateDatasetS
     scaler_path = base_dir / "models" / "surrogate_scaler.json"
 
     scaler = SurrogateDatasetScaler.load_json(str(scaler_path))
-    model = CubeSatSurrogateResNet(input_dim=5, output_dim=4, hidden_dim=64, num_blocks=2)
+    model = CubeSatSurrogateResNet(input_dim=5, output_dim=3, hidden_dim=64, num_blocks=2)
     state_dict = torch.load(str(model_path), weights_only=True, map_location=torch.device("cpu"))
     if isinstance(state_dict, dict) and "model_state_dict" in state_dict:
         state_dict = state_dict["model_state_dict"]
@@ -185,7 +185,7 @@ def neural_surrogate_agent(state: CubeSatState) -> Dict[str, Any]:
         "f1_hz": float(y_raw[0]),
         "max_stress_mpa": float(y_raw[1]),
         "grms_payload": float(y_raw[2]),
-        "transmissibility": float(y_raw[3]),
+        "transmissibility": float(y_raw[2]) / 14.1,
     }
 
     audit_entry = _record_audit_event(

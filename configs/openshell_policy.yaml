@@ -1,0 +1,44 @@
+# NVIDIA OpenShell-Inspired Declarative Execution Policy
+# For LangGraph Autonomous Agents running Engineering Solvers and Scientific Workflows
+
+version: "1.0"
+metadata:
+  profile: "scientific-simulation-sandbox"
+  author: "Gabriel Marques de Andrade"
+  description: "Strict kernel and process governance for autonomous FEA and thermal solvers."
+
+security_policy:
+  enforcement_mode: "enforce"
+  allow_network: false
+  max_execution_time_seconds: 600
+
+  resource_limits:
+    max_memory_mb: 16384
+    max_cpu_cores: 8
+    max_io_write_mb: 4096
+
+  filesystem_sandbox:
+    read_only_paths:
+      - "/usr"
+      - "/lib"
+      - "/lib64"
+      - "/etc"
+      - "/home/marques/.tools/vendors"
+    read_write_paths:
+      - "/home/marques/Área de trabalho/2026.2/TCC/data"
+      - "/home/marques/Área de trabalho/2026.2/TCC/.scratch"
+      - "/home/marques/Área de trabalho/2026.2/IC/data"
+      - "/home/marques/Área de trabalho/2026.2/IC/experiments"
+    forbidden_paths:
+      - "/home/marques/.ssh"
+      - "/root"
+      - "/boot"
+
+  allowed_executables:
+    - "/usr/bin/gmsh"
+    - "/usr/bin/aster"
+    - "/usr/bin/ccx"
+    - "/usr/bin/openradioss"
+    - "/usr/bin/python3"
+    - "/home/marques/Área de trabalho/2026.2/TCC/.venv/bin/python"
+    - "/home/marques/Área de trabalho/2026.2/IC/.venv/bin/python"

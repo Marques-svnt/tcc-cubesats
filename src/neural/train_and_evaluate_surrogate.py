@@ -9,7 +9,7 @@ import logging
 import math
 from pathlib import Path
 import time
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -18,38 +18,56 @@ from src.neural.surrogate_model import (
     SurrogateDatasetScaler,
     compute_regression_metrics,
     fit_scaler_from_data,
+    k_fold_cross_validation,
+    run_ablation_study,
     train_surrogate_model,
 )
 
 logger = logging.getLogger(__name__)
 
 
-def load_fea_dataset(dataset_path: str | Path) -> Tuple[np.ndarray, np.ndarray, List[str], List[str]]:
+def load_fea_dataset(
+    dataset_path: str | Path,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, List[str], List[str]]:
     """Loads input features and dynamic targets from the FEA CSV dataset.
 
     Args:
         dataset_path: Path to cubesat_fea_doe_dataset.csv.
 
     Returns:
-        Tuple of (X_matrix, Y_matrix, feature_names, target_names).
+        Tuple of (X_matrix, Y_3d_matrix, Y_4d_matrix, feature_names, target_names).
     """
     path = Path(dataset_path)
     if not path.exists():
         raise FileNotFoundError(f"Dataset not found at {path}")
 
     feature_names = ["theta_deg", "thickness_t", "length_l", "height_h", "relative_density"]
-    target_names = ["first_natural_freq_hz", "peak_3sigma_stress_mpa", "payload_grms", "transmissibility_ratio"]
+    target_names_3d = ["first_natural_freq_hz", "peak_3sigma_stress_mpa", "payload_grms"]
+    target_names_4d = [
+        "first_natural_freq_hz",
+        "peak_3sigma_stress_mpa",
+        "payload_grms",
+        "transmissibility_ratio",
+    ]
 
-    x_list, y_list = [], []
+    x_list, y_3d_list, y_4d_list = [], [], []
     with open(path, mode="r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             x_vals = [float(row[k]) for k in feature_names]
-            y_vals = [float(row[k]) for k in target_names]
+            y3_vals = [float(row[k]) for k in target_names_3d]
+            y4_vals = [float(row[k]) for k in target_names_4d]
             x_list.append(x_vals)
-            y_list.append(y_vals)
+            y_3d_list.append(y3_vals)
+            y_4d_list.append(y4_vals)
 
-    return np.array(x_list, dtype=np.float32), np.array(y_list, dtype=np.float32), feature_names, target_names
+    return (
+        np.array(x_list, dtype=np.float32),
+        np.array(y_3d_list, dtype=np.float32),
+        np.array(y_4d_list, dtype=np.float32),
+        feature_names,
+        target_names_4d,
+    )
 
 
 def plot_parity_curves(
@@ -61,8 +79,8 @@ def plot_parity_curves(
     """Generates a 4-panel publication-grade parity plot (True FEA vs. Surrogate Prediction).
 
     Args:
-        y_true: True test targets matrix.
-        y_pred: Predicted test targets matrix.
+        y_true: True test targets matrix (N, 4).
+        y_pred: Predicted test targets matrix (N, 4).
         target_names: Target variable names.
         output_image_path: Path to save the PNG image.
 
@@ -79,7 +97,7 @@ def plot_parity_curves(
         r"Fundamental Frequency $f_1$ (Hz)",
         r"Peak $3\sigma$ Stress $\sigma_{\mathrm{peak}}$ (MPa)",
         r"Payload Acceleration $G_{\mathrm{rms}}$ (g)",
-        r"Transmissibility Ratio $T$",
+        r"Transmissibility Ratio $T$ (derived: $G_{\mathrm{rms}}/14.1$)",
     ]
 
     for idx, ax in enumerate(axes):
@@ -108,6 +126,7 @@ def plot_parity_curves(
 
     plt.tight_layout()
     plt.savefig(target_path, bbox_inches="tight")
+    plt.savefig(target_path.with_suffix(".pdf"), bbox_inches="tight")
     plt.close()
 
     logger.info("Saved 4-panel parity plot to %s", target_path)
@@ -151,7 +170,8 @@ def benchmark_inference_latency(
 
 
 def run_pipeline() -> Dict[str, Any]:
-    """Executes the full surrogate training, evaluation, and persistence pipeline."""
+    """Executes the full surrogate training, 10-fold CV, ablation, and evaluation."""
+    import json
     import torch
 
     base_dir = Path(__file__).resolve().parent.parent.parent
@@ -161,11 +181,36 @@ def run_pipeline() -> Dict[str, Any]:
     reports_dir = base_dir / "reports"
     reports_dir.mkdir(parents=True, exist_ok=True)
 
-    x_raw, y_raw, feat_names, targ_names = load_fea_dataset(data_csv)
+    x_raw, y_3d_raw, y_4d_raw, feat_names, targ_names = load_fea_dataset(data_csv)
 
+    logger.info("1. Executing 10-Fold Stratified Cross-Validation for PG-ResNet...")
+    cv_pg_resnet = k_fold_cross_validation(
+        x_data=x_raw,
+        y_data=y_3d_raw,
+        k=10,
+        epochs=300,
+        batch_size=32,
+        lr=2e-3,
+        model_architecture="resnet",
+        use_physics_loss=True,
+        random_seed=42,
+    )
+
+    logger.info("2. Executing Systematic 4-Model Ablation Study (10-fold CV each)...")
+    ablation_results = run_ablation_study(
+        x_data=x_raw,
+        y_data=y_3d_raw,
+        k=10,
+        epochs=250,
+        batch_size=32,
+        lr=2e-3,
+        random_seed=42,
+    )
+
+    logger.info("3. Training Final Production PG-ResNet (80/20 train/test)...")
     model, scaler, history = train_surrogate_model(
         x_data=x_raw,
-        y_data=y_raw,
+        y_data=y_3d_raw,
         epochs=350,
         batch_size=32,
         lr=2e-3,
@@ -179,22 +224,29 @@ def run_pipeline() -> Dict[str, Any]:
     torch.save(model.state_dict(), model_path)
     scaler.save_json(scaler_path)
 
-    # Generate Parity Plots on Test Partition
+    # Generate Parity Plots on Test Partition (4 panels with analytical T = Grms / 14.1)
     n_samples = len(x_raw)
     n_train = int(n_samples * 0.8)
     np.random.seed(42)
     test_indices = np.random.permutation(n_samples)[n_train:]
     x_test_raw = x_raw[test_indices]
-    y_test_raw = y_raw[test_indices]
+    y_test_4d_true = y_4d_raw[test_indices]
 
     x_test_norm = torch.from_numpy(scaler.transform_x(x_test_raw)).float()
     model.eval()
     with torch.no_grad():
         y_test_pred_norm = model(x_test_norm).numpy()
-    y_test_pred = scaler.inverse_transform_y(y_test_pred_norm)
+    y_test_3d_pred = scaler.inverse_transform_y(y_test_pred_norm)
+    t_pred = (y_test_3d_pred[:, 2:3] / 14.1).astype(np.float32)
+    y_test_4d_pred = np.hstack([y_test_3d_pred, t_pred])
 
     parity_plot_path = reports_dir / "parity_plots.png"
-    plot_parity_curves(y_true=y_test_raw, y_pred=y_test_pred, target_names=targ_names, output_image_path=parity_plot_path)
+    plot_parity_curves(
+        y_true=y_test_4d_true,
+        y_pred=y_test_4d_pred,
+        target_names=targ_names,
+        output_image_path=parity_plot_path,
+    )
 
     latency_ms = benchmark_inference_latency(model, scaler)
 
@@ -203,8 +255,18 @@ def run_pipeline() -> Dict[str, Any]:
         "scaler_path": str(scaler_path),
         "parity_plot_path": str(parity_plot_path),
         "latency_ms": latency_ms,
-        "metrics": history["final_test_metrics"],
+        "test_metrics_holdout": history["final_test_metrics"],
+        "cv_pg_resnet_10fold": cv_pg_resnet["metrics_summary"],
+        "ablation_study_10fold": {
+            name: res["metrics_summary"] for name, res in ablation_results.items()
+        },
     }
+
+    report_json_path = reports_dir / "sprint1_surrogate_evaluation.json"
+    with open(report_json_path, "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=2)
+    logger.info("Saved Sprint 1 evaluation summary to %s", report_json_path)
+
     return summary
 
 

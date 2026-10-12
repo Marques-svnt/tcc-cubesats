@@ -44,6 +44,7 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+.github/
 *.swp
 *.swo
 *~
@@ -58,6 +59,7 @@ desktop.ini
 
 # --- CAE & Solvers de Elementos Finitos (Ansys MAPDL / Mechanical) ---
 *.lock
+!uv.lock
 *.rst
 *.rth
 *.mode
@@ -98,4 +100,10 @@ logs/*.log
 *.snm
 *.vrb
 *.synctex.gz
-
+*.fdb_latexmk
+*.fls
+*.bbl
+*.blg
+*.run.xml
+*.bcf
+*.loa

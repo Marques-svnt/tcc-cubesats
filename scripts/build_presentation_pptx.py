@@ -141,7 +141,7 @@ def create_deck(output_pptx_path: Path, figures_dir: Path) -> None:
     p1.space_after = Pt(20)
     
     p2 = tf1.add_paragraph()
-    p2.text = "CubeSat em Baixa Órbita: Otimização de Volume e Geometria para Maximização de Desempenho Estrutural e Funcional"
+    p2.text = "Otimização Estrutural de Chassi CubeSat 1U com Metamateriais Auxéticos em AlSi10Mg sob Cargas Dinâmicas de Lançamento"
     p2.font.name = "Calibri"
     p2.font.size = Pt(26)
     p2.font.bold = True

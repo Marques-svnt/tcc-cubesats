@@ -97,10 +97,13 @@ MO = AFFE_MODELE(
 )
 """
         else:
-            comm_content += """# Flexible Test POD Mount: Fixed bottom base in Z=0, spring interface
+            comm_content += """# Flexible Test POD Mount: Axial support at Z=0 base, lateral guide contact on rails
 BLOCAGE = AFFE_CHAR_MECA(
     MODELE=MO,
-    DDL_IMPO=_F(GROUP_MA='Bottom_Base_Z0', DZ=0.0),
+    DDL_IMPO=(
+        _F(GROUP_MA='Bottom_Base_Z0', DZ=0.0),
+        _F(GROUP_MA='Rails_Contact_Surfaces', DX=0.0, DY=0.0),
+    ),
 )
 """
 

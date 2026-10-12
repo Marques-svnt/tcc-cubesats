@@ -1,0 +1,126 @@
+name: CubeSat CI/CD Qualification & Verification
+
+on:
+  push:
+    branches: [ main, "feat/**", "sprint-**" ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-quality:
+    name: Code Quality & Static Analysis (Ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          version: "latest"
+
+      - name: Set up Python 3.12
+        run: uv python install 3.12
+
+      - name: Lint and Format Verification (Ruff)
+        run: |
+          uv tool run ruff check src tests
+          uv tool run ruff format --check src tests
+
+  test-and-coverage:
+    name: Automated Unit, Property & Dynamic Qualification Tests
+    runs-on: ubuntu-latest
+    needs: [lint-and-quality]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          version: "latest"
+
+      - name: Set up Python 3.12
+        run: uv python install 3.12
+
+      - name: Install System CAE Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gmsh libopenblas0
+
+      - name: Sync Dependencies from uv.lock
+        run: |
+          uv sync --frozen --extra test
+
+      - name: Execute Pytest Suite (80+ Tests & Coverage)
+        run: |
+          uv run pytest --cov=src --cov-report=term-missing --cov-report=xml tests/
+
+      - name: Upload Test Coverage Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage.xml
+          retention-days: 14
+
+  pipeline-smoke-test:
+    name: End-to-End Autonomous Pipeline & Uncertainty Verification
+    runs-on: ubuntu-latest
+    needs: [test-and-coverage]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          version: "latest"
+
+      - name: Set up Python 3.12
+        run: uv python install 3.12
+
+      - name: Sync Dependencies
+        run: uv sync --frozen
+
+      - name: Run DoE Screening Pipeline
+        run: uv run python run_pipeline.py
+
+      - name: Verify Canonical Flight Comparison Artifact
+        run: |
+          test -f reports/flight_design_comparison.json
+          python -c "import json; data = json.load(open('reports/flight_design_comparison.json')); assert data['fea_ground_truth_responses']['is_nasa_gevs_compliant'] is True"
+
+  monograph-compilation:
+    name: LaTeX Monograph Compilation & Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Compile LaTeX Monograph (UESC PPGMC Template)
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: Main.tex
+          working_directory: monografia
+          args: -pdf -file-line-error -interaction=nonstopmode -synctex=1
+
+      - name: Verify Compiled Monograph PDF
+        run: |
+          test -f monografia/Main.pdf
+          ls -lh monografia/Main.pdf
+
+      - name: Upload Monograph PDF Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: monografia_tcc_final_pdf
+          path: monografia/Main.pdf
+          retention-days: 30

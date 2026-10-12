@@ -1,0 +1,538 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex)
+ restricted \write18 enabled.
+entering extended mode
+(./main.tex
+LaTeX2e <2023-11-01> patch level 1
+L3 programming layer <2024-01-22>
+(./SNmono.cls
+Document Class: SNmono 2025/11/11 v6.00 
+Springer Nature global LaTeX document class for monographs
+(/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2023/05/17 v1.4n Standard LaTeX document class
+(/usr/share/texlive/texmf-dist/tex/latex/base/size10.clo))
+(/usr/share/texlive/texmf-dist/tex/latex/xcolor/xcolor.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/color.cfg)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-def/pdftex.def)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/mathcolor.ltx))
+(/usr/share/texlive/texmf-dist/tex/latex/xcolor/x11nam.def)
+(/usr/share/texlive/texmf-dist/tex/latex/amscls/amsthm.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/framed/framed.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/type1cm/type1cm.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/base/makeidx.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/graphics.cfg)))
+(/usr/share/texlive/texmf-dist/tex/latex/tools/multicol.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/footmisc/footmisc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/mathptmx.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
+For additional information on amsmath, use the `?' option.
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amssymb.sty
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amsfonts.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/mathtools/mathtools.sty
+(/usr/share/texlive/texmf-dist/tex/latex/tools/calc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/mathtools/mhsetup.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/tools/bm.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/booktabs/booktabs.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/siunitx/siunitx.sty
+(/usr/share/texlive/texmf-dist/tex/latex/translations/translations.sty
+(/usr/share/texlive/texmf-dist/tex/latex/etoolbox/etoolbox.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(/usr/share/texlive/texmf-dist/tex/generic/infwarerr/infwarerr.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/iftex.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/tools/array.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/adjustbox/adjustbox.sty
+(/usr/share/texlive/texmf-dist/tex/latex/xkeyval/xkeyval.sty
+(/usr/share/texlive/texmf-dist/tex/generic/xkeyval/xkeyval.tex
+(/usr/share/texlive/texmf-dist/tex/generic/xkeyval/xkvutils.tex)))
+(/usr/share/texlive/texmf-dist/tex/latex/adjustbox/adjcalc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/adjustbox/trimclip.sty
+(/usr/share/texlive/texmf-dist/tex/latex/collectbox/collectbox.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/adjustbox/tc-pdftex.def))
+(/usr/share/texlive/texmf-dist/tex/latex/ifoddpage/ifoddpage.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/varwidth/varwidth.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/tools/tabularx.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/listings/listings.sty
+(/usr/share/texlive/texmf-dist/tex/latex/listings/lstmisc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/listings/listings.cfg))
+(/usr/share/texlive/texmf-dist/tex/latex/url/url.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hyperref.sty
+(/usr/share/texlive/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/pdfescape/pdfescape.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/auxhook/auxhook.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
+(/usr/share/texlive/texmf-dist/tex/latex/refcount/refcount.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+(/usr/share/texlive/texmf-dist/tex/latex/kvoptions/kvoptions.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(/usr/share/texlive/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/puenc.def)
+(/usr/share/texlive/texmf-dist/tex/generic/bitset/bitset.sty
+(/usr/share/texlive/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/base/atbegshi-ltx.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hpdftex.def
+(/usr/share/texlive/texmf-dist/tex/latex/base/atveryend-ltx.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+(/usr/share/texlive/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty)))
+Writing index file main.idx
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ptm.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def)
+(./main.aux (./frontmatter/dedication.aux) (./frontmatter/preface.aux)
+(./frontmatter/acknowledgement.aux) (./frontmatter/ethics.aux)
+(./frontmatter/acronyms.aux) (./chapters/01_launch_environment.aux)
+(./chapters/02_auxetic_mechanics.aux
+
+LaTeX Warning: Label `sec:chapter_summary' multiply defined.
+
+) (./chapters/03_dfam_alsi10mg.aux) (./chapters/04_fea_spectral.aux
+
+LaTeX Warning: Label `tab:gevs_profile' multiply defined.
+
+
+LaTeX Warning: Label `eq:basquin_law' multiply defined.
+
+
+LaTeX Warning: Label `eq:nasa_fatigue_limit' multiply defined.
+
+) (./chapters/05_pgml_optimization.aux) (./chapters/06_flight_qualification.aux
+
+LaTeX Warning: Label `eq:optimal_vector' multiply defined.
+
+
+LaTeX Warning: Label `eq:poisson_2d' multiply defined.
+
+
+LaTeX Warning: Label `eq:three_sigma_def' multiply defined.
+
+
+LaTeX Warning: Label `eq:total_cycles' multiply defined.
+
+
+LaTeX Warning: Label `fig:shock_srs' multiply defined.
+
+
+LaTeX Warning: Label `sec:chapter_summary' multiply defined.
+
+) (./appendices/app_a_fea_decks.aux) (./appendices/app_b_code_listings.aux))
+(/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg))
+(/usr/share/texlive/texmf-dist/tex/latex/translations/translations-basic-dictio
+nary-english.trsl) (./main.out) (./main.out) [1{/var/lib/texmf/fonts/map/pdftex
+/updmap/pdftex.map}{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}]
+ [2] (./frontmatter/dedication.tex [5]) (./frontmatter/preface.tex [6]
+
+Package mathptmx Warning: There are no bold math fonts on input line 2.
+
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ztmcm.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/omlztmcm.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/omsztmcm.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/omxztmcm.fd) [7]) [8]
+(./frontmatter/acknowledgement.tex) [9] (./frontmatter/ethics.tex [10])
+[11] [12] (./main.toc [13] [14] [15] [16]) [17] (./frontmatter/acronyms.tex
+[18] [19]) [20] (./chapters/01_launch_environment.tex
+Chapter 1.
+
+pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
+been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.30 \item \textbf
+                  {Surface Finish and Tribology:} Rail surfaces must exhibit...
+[1] (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd)
+Overfull \hbox (26.16571pt too wide) in paragraph at lines 34--35
+\OT1/ptm/m/n/10 i-cally Con-trolled (CNC) ma-chined from wrought aerospace alu-
+minum al-loys|predominantly
+
+pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has 
+been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.42 \section
+             {The Poly-Picosatellite Orbital Deployer (P-POD) Interface}
+[2 <./figures/cubesat_1u_isometric_assembly.pdf>] [3 <./figures/ppod_explodido.
+pdf>] [4] [5 <./figures/interface_cubesat_deployer.pdf>] [6 <./figures/ppod_sep
+aration_shock_srs.pdf>] [7] [8] [9] [10 <./figures/psd_gevs_vs_payload_response
+.pdf>] [11] [12]) [13] (./chapters/02_auxetic_mechanics.tex [14]
+Chapter 2.
+
+Overfull \hbox (12.61586pt too wide) in paragraph at lines 17--18
+\OT1/ptm/m/n/10 shocks, as for-mal-ized in Chap-ter [][]1[][]. Con-ven-tional s
+mall satel-lite air-frames|predominantly
+[15] [16] [17 <./figures/auxetic_cell_geometry.pdf>] [18] [19] [20]
+Overfull \hbox (71.87708pt too wide) in alignment at lines 209--218
+[] [] [] [] 
+[21] [22] [23]
+Overfull \hbox (78.62613pt too wide) detected at line 282
+[][][]\OML/ztmcm/m/it/10 ^^Z[] \OT1/ztmcm/m/n/10 = [] = [] = [] = 0\OML/ztmcm/m
+/it/10 :\OT1/ztmcm/m/n/10 10497\OML/ztmcm/m/it/10 :
+[24] [25]
+Overfull \hbox (12.20078pt too wide) in paragraph at lines 345--346
+\OT1/ptm/m/n/10 struts ex-hibit arith-metic sur-face rough-ness $\OML/ztmcm/m/i
+t/10 Ra \OMS/ztmcm/m/n/10 2 \OT1/ztmcm/m/n/10 [10\OML/ztmcm/m/it/10 ; \OT1/ztmc
+m/m/n/10 25] \OML/ztmcm/m/it/10 ^^V[]$\OT1/ptm/m/n/10 , par-tic-u-larly on down
+ward-
+[26] [27] [28 <./figures/phononic_dispersion_bandgap.pdf>] [29]
+Underfull \hbox (badness 5563) in paragraph at lines 507--510
+\OT1/ptm/m/n/10 lat-tices ($\OML/ztmcm/m/it/10 a=^^U \OMS/ztmcm/m/n/10 ^^Y \OT1
+/ztmcm/m/n/10 0\OML/ztmcm/m/it/10 :\OT1/ztmcm/m/n/10 5$\OT1/ptm/m/n/10 ). In th
+e NASA GEVS launch qual-i-fi-ca-tion band
+
+Overfull \hbox (15.93538pt too wide) detected at line 526
+[][][]\OML/ztmcm/m/it/10 Z[] \OT1/ztmcm/m/n/10 = \OML/ztmcm/m/it/10 ^^Z[] \OMS/
+ztmcm/m/n/10 ^^A \OML/ztmcm/m/it/10 c[] \OT1/ztmcm/m/n/10 = 2670\OML/ztmcm/m/it
+/10 :\OT1/ztmcm/m/n/10 0 []\OML/ztmcm/m/it/10 =\OT1/ztmcm/m/n/10 m[] \OMS/ztmcm
+/m/n/10 ^^B \OT1/ztmcm/m/n/10 5046 m s[] = 13\OML/ztmcm/m/it/10 :\OT1/ztmcm/m/n
+/10 473 \OMS/ztmcm/m/n/10 ^^B \OT1/ztmcm/m/n/10 10[] [] s m[] = []\OML/ztmcm/m/
+it/10 :
+[30]
+Overfull \hbox (5.5518pt too wide) detected at line 537
+[][][]\OML/ztmcm/m/it/10 Z[] \OT1/ztmcm/m/n/10 = \OML/ztmcm/m/it/10 ^^Z[] \OMS/
+ztmcm/m/n/10 ^^A \OML/ztmcm/m/it/10 c[] \OT1/ztmcm/m/n/10 = 334\OML/ztmcm/m/it/
+10 :\OT1/ztmcm/m/n/10 28 []\OML/ztmcm/m/it/10 =\OT1/ztmcm/m/n/10 m[] \OMS/ztmcm
+/m/n/10 ^^B \OT1/ztmcm/m/n/10 4158 m s[] = 1\OML/ztmcm/m/it/10 :\OT1/ztmcm/m/n/
+10 390 \OMS/ztmcm/m/n/10 ^^B \OT1/ztmcm/m/n/10 10[] [] s m[] = []\OML/ztmcm/m/i
+t/10 :
+
+Overfull \hbox (75.09718pt too wide) detected at line 560
+[][][]\OML/ztmcm/m/it/10 f[] \OT1/ztmcm/m/n/10 = [][] = [][] = [][] \OMS/ztmcm/
+m/n/10 ^^Y \OT1/ztmcm/m/n/10 2820 []\OML/ztmcm/m/it/10 :
+[31]
+Underfull \hbox (badness 10000) in paragraph at lines 591--591
+[]|\OT1/ptm/b/n/8.5 Governing Re-la-tion-
+
+Underfull \hbox (badness 10000) in paragraph at lines 593--593
+[]|\OT1/ptm/b/n/8.5 Acoustic Impedance
+
+Underfull \hbox (badness 10000) in paragraph at lines 595--595
+[]|\OT1/ptm/b/n/8.5 Local Strut Anti-
+
+Underfull \hbox (badness 10000) in paragraph at lines 597--597
+[]|$\OML/ztmcm/m/it/8.5 ^^W[] \OT1/ztmcm/m/n/8.5 = \OMS/ztmcm/m/n/8.5 ^^@\OT1/z
+tmcm/m/n/8.5 0\OML/ztmcm/m/it/8.5 :\OT1/ztmcm/m/n/8.5 428$ \OT1/ptm/m/n/8.5 syn
+-
+
+Underfull \hbox (badness 10000) in paragraph at lines 599--599
+[]|\OT1/ptm/m/n/8.5 High fre-quen-cies
+
+Overfull \hbox (28.1949pt too wide) in alignment at lines 589--601
+[] [] [] [] 
+[32]
+Overfull \hbox (14.74666pt too wide) in paragraph at lines 609--610
+\OT1/ptm/m/n/10 closed-form in-plane Pois-son's ra-tio for 2D re-entrant hon-ey
+-combs ($\OML/ztmcm/m/it/10 ^^W[] \OT1/ztmcm/m/n/10 = \OMS/ztmcm/m/n/10 ^^@\OT1
+/ztmcm/m/n/10 [[] \OML/ztmcm/m/it/10 ^^R\OT1/ztmcm/m/n/10 (\OML/ztmcm/m/it/10 h
+=l \OT1/ztmcm/m/n/10 +
+) [33] [34] (./chapters/03_dfam_alsi10mg.tex
+Chapter 3.
+[35] [36]
+Overfull \hbox (4.55792pt too wide) in paragraph at lines 49--50
+[]\OT1/ptm/b/n/10 Precipitation Hard-en-abil-ity ($[][][]$): \OT1/ptm/m/n/10 Th
+e ad-di-tion of mag-ne-sium ($\OT1/ztmcm/m/n/10 0\OML/ztmcm/m/it/10 :\OT1/ztmcm
+/m/n/10 20[]0\OML/ztmcm/m/it/10 :\OT1/ztmcm/m/n/10 45 []$\OT1/ptm/m/n/10 )
+[37] [38 <./figures/lpbf_am_build_strategy_and_hatching.pdf>] [39] [40]
+[41] [42] [43]
+Overfull \hbox (4.21559pt too wide) in paragraph at lines 257--258
+\OT1/ptm/m/n/10 To guar-an-tee struc-tural re-li-a-bil-ity and sat-isfy mis-sio
+n spec-i-fi-ca-tions, two post-processing
+[44] [45] [46] [47 <./figures/orientacoes_impressao_pla.pdf>] [48] [49]
+[50 <./figures/tet10_mesh_refinement_notch_zoom.pdf>]) [51]
+(./chapters/04_fea_spectral.tex [52]
+Chapter 4.
+[53]
+Overfull \hbox (6.76666pt too wide) in paragraph at lines 23--24
+\OT1/ptm/m/n/10 ous multi-degree-of-freedom spec-tral ran-dom vi-bra-tion re-sp
+onse (\OT1/cmtt/m/n/10 DYNA[]ALEA[]MODAL\OT1/ptm/m/n/10 )
+[54]
+Overfull \hbox (9.12602pt too wide) in paragraph at lines 55--56
+\OT1/ptm/m/n/10 To en-sure com-plete man-u-fac-tura-bil-ity via Laser Pow-der B
+ed Fu-sion (LPBF) in aerospace-
+[55]
+Overfull \hbox (16.71033pt too wide) detected at line 110
+[]
+[56] [57] [58] [59]
+
+LaTeX Font Warning: Font shape `OT1/cmtt/bx/n' in size <11> not available
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 219.
+
+
+Overfull \hbox (53.88612pt too wide) in paragraph at lines 221--222
+\OT1/ptm/m/n/10 Lanc-zos/-Sorensen al-go-rithm [[], []] via ARPACK (\OT1/cmtt/m
+/n/10 SOLVEUR[]MODAL=[]F(METHODE='SORENSEN')\OT1/ptm/m/n/10 ).
+[60]
+Overfull \hbox (24.71022pt too wide) in alignment at lines 273--290
+[] [] [] [] [] [] 
+[61 <./figures/fem_modal_vibration_mode1_contour.pdf>] [62] [63] [64] [65]
+Overfull \hbox (54.26517pt too wide) in paragraph at lines 455--456
+[]\OT1/ptm/m/n/10 The iden-ti-cal 3D Gmsh mesh was ex-ported to Cal-culiX for-m
+at (\OT1/cmtt/m/n/10 cubesat[]calculix[]modal.inp\OT1/ptm/m/n/10 )
+
+Overfull \hbox (23.93811pt too wide) in paragraph at lines 455--456
+\OT1/ptm/m/n/10 with iden-ti-cal lin-ear isotropic ma-te-rial con-stants ($\OML
+/ztmcm/m/it/10 E \OT1/ztmcm/m/n/10 = 68\OML/ztmcm/m/it/10 :\OT1/ztmcm/m/n/10 0 
+[]$\OT1/ptm/m/n/10 , $\OML/ztmcm/m/it/10 ^^W \OT1/ztmcm/m/n/10 = 0\OML/ztmcm/m/
+it/10 :\OT1/ztmcm/m/n/10 33$\OT1/ptm/m/n/10 , $\OML/ztmcm/m/it/10 ^^Z \OT1/ztmc
+m/m/n/10 = 2680\OML/ztmcm/m/it/10 :\OT1/ztmcm/m/n/10 0 []\OML/ztmcm/m/it/10 =\O
+T1/ztmcm/m/n/10 m[]$\OT1/ptm/m/n/10 )
+[66]
+Overfull \hbox (83.7746pt too wide) in alignment at lines 507--522
+[] [] [] [] [] 
+[67]
+Overfull \hbox (12.30786pt too wide) in paragraph at lines 533--534
+\OT1/ptm/m/n/10 bra-tion anal-y-sis un-der $\OT1/ztmcm/m/n/10 14\OML/ztmcm/m/it
+/10 :\OT1/ztmcm/m/n/10 1[][]$ \OT1/ptm/m/n/10 base ex-ci-ta-tion yielded a peak
+ $\OT1/ztmcm/m/n/10 3\OML/ztmcm/m/it/10 ^^[$ \OT1/ptm/m/n/10 stress of $\OT1/zt
+mcm/m/n/10 166\OML/ztmcm/m/it/10 :\OT1/ztmcm/m/n/10 91 []$
+[68]
+Overfull \hbox (25.1552pt too wide) in paragraph at lines 534--535
+[]\OT1/ptm/b/n/10 Multi-Solver In-de-pen-dent Ver-i-fi-ca-tion: \OT1/ptm/m/n/10
+ Cal-culiX cross-verification matched Code[]Aster
+) [69] (./chapters/05_pgml_optimization.tex [70]
+Chapter 5.
+[71]
+Overfull \hbox (9.22676pt too wide) in paragraph at lines 19--20
+[]\OT1/ptm/m/n/10 However, eval-u-at-ing a sin-gle can-di-date ge-om-e-try with
+in an industrial-grade Computer-
+
+Overfull \hbox (17.66103pt too wide) in paragraph at lines 24--25
+[]\OT1/ptm/m/n/10 Continuous spec-tral modal ran-dom vi-bra-tion in-te-gra-tion
+ ($\OT1/ptm/b/n/10 S[]\OT1/ztmcm/m/n/10 (\OML/ztmcm/m/it/10 !\OT1/ztmcm/m/n/10 
+) = \OT1/ptm/b/n/10 H\OT1/ztmcm/m/n/10 (\OML/ztmcm/m/it/10 !\OT1/ztmcm/m/n/10 )
+\OT1/ptm/b/n/10 S[]\OT1/ztmcm/m/n/10 (\OML/ztmcm/m/it/10 !\OT1/ztmcm/m/n/10 )\O
+T1/ptm/b/n/10 H[]\OT1/ztmcm/m/n/10 (\OML/ztmcm/m/it/10 !\OT1/ztmcm/m/n/10 )$\OT
+1/ptm/m/n/10 )
+[72] [73]
+Overfull \hbox (15.8556pt too wide) in paragraph at lines 107--108
+\OT1/ptm/m/n/10 de-sign do-main $\OML/ztmcm/m/it/10 
+$\OT1/ptm/m/n/10 , we im-ple-ment Latin Hy-per-cube Sam-pling (LHS) with multi-
+dimensional
+[74]
+Overfull \hbox (16.12488pt too wide) in alignment at lines 137--147
+[] [] [] [] [] 
+
+Overfull \hbox (12.93764pt too wide) in paragraph at lines 155--156
+\OT1/ptm/m/n/10 To ap-prox-i-mate the non-linear elas-to-dy-namic map-ping $\OM
+S/ztmcm/m/n/10 M \OT1/ztmcm/m/n/10 : \U/msb/m/n/10 R[] \OMS/ztmcm/m/n/10 ! \U/m
+sb/m/n/10 R[]$ \OT1/ptm/m/n/10 with sub-millisecond
+[75 <./figures/neural_response_surface_doe_sampling.pdf>]
+Overfull \hbox (6.2768pt too wide) in paragraph at lines 165--166
+[]\OT1/ptm/b/n/10 Standard Z-Score Fea-ture Scal-ing: \OT1/ptm/m/n/10 In-puts a
+nd tar-gets are nor-mal-ized us-ing training-
+[76]
+Overfull \hbox (10.97514pt too wide) in paragraph at lines 219--220
+[]\OT1/ptm/m/n/10 The Gibson-Ashby penalty reg-u-lar-izes the un-normalized pre
+-dicted fre-quency $[] \OT1/ztmcm/m/n/10 =
+[77] [78] [79 <./figures/resnet_training_telemetry_dashboard.pdf>] [80 <./figur
+es/parity_plots.pdf>]
+Overfull \hbox (16.05193pt too wide) in paragraph at lines 319--321
+\OT1/ptm/m/n/10 When bench-marked against the ultra-refined high-resolution mes
+h con-fig-u-ra-tion ($\OML/ztmcm/m/it/10 t[] \OT1/ztmcm/m/n/10 =
+[81]
+Overfull \hbox (5.94632pt too wide) in paragraph at lines 356--357
+[]\OT1/ptm/m/n/10 Summing these con-tri-bu-tions yields the to-tal end-to-end e
+lapsed time of the surrogate-
+[82] [83] [84] [85 <./figures/pareto_frontier.pdf>] [86]
+Overfull \hbox (64.86813pt too wide) in alignment at lines 545--559
+[] [] [] [] [] 
+[87]
+Underfull \hbox (badness 2012) in paragraph at lines 588--589
+[]\OT1/ptm/b/n/10 Optimal Flight Can-di-date #28: \OT1/ptm/m/n/10 Multi-objecti
+ve NSGA-II search and
+) [88] (./chapters/06_flight_qualification.tex
+Chapter 6.
+[89] [90] [91]
+Overfull \hbox (47.6798pt too wide) in alignment at lines 92--111
+[] [] [] [] 
+[92]
+Overfull \hbox (9.78065pt too wide) in paragraph at lines 126--127
+[]\OT1/ptm/b/n/10 Melt Pool Co-a-les-cence and Min-i-mum Wall Thick-ness: \OT1/
+ptm/m/n/10 Strut thick-ness $\OML/ztmcm/m/it/10 t \OT1/ztmcm/m/n/10 = 0\OML/ztm
+cm/m/it/10 :\OT1/ztmcm/m/n/10 613 []$
+[93]
+Overfull \hbox (54.58675pt too wide) in alignment at lines 165--175
+[] [] [] [] [] [] 
+[94] [95] [96]
+Overfull \hbox (12.14633pt too wide) in paragraph at lines 265--266
+[]\OT1/ptm/b/n/10 Acoustic Impedance Mis-match at Rail-Lattice Bound-aries: \OT
+1/ptm/m/n/10 The acous-tic impedance
+
+Overfull \hbox (10.26028pt too wide) in paragraph at lines 265--266
+\OT1/ptm/m/n/10 of the solid de-ployer rail is $\OML/ztmcm/m/it/10 Z[] \OT1/ztm
+cm/m/n/10 = \OML/ztmcm/m/it/10 ^^Z[]c[] \OT1/ztmcm/m/n/10 = 2670 \OMS/ztmcm/m/n
+/10 ^^B [] ^^Y \OT1/ztmcm/m/n/10 13\OML/ztmcm/m/it/10 :\OT1/ztmcm/m/n/10 47 []\
+OML/ztmcm/m/it/10 =\OT1/ztmcm/m/n/10 m$\OT1/ptm/m/n/10 .
+[97]
+Overfull \hbox (16.42706pt too wide) in paragraph at lines 301--303
+\OT1/ptm/m/n/10 The ef-fec-tive elas-tic notch con-cen-tra-tion fac-tor is $\OM
+L/ztmcm/m/it/10 K[] \OT1/ztmcm/m/n/10 = \OML/ztmcm/m/it/10 ^^[[]=^^[[] \OT1/ztm
+cm/m/n/10 = 166\OML/ztmcm/m/it/10 :\OT1/ztmcm/m/n/10 91\OML/ztmcm/m/it/10 =\OT1
+/ztmcm/m/n/10 68\OML/ztmcm/m/it/10 :\OT1/ztmcm/m/n/10 80 \OMS/ztmcm/m/n/10 ^^Y
+[98] [99]
+Overfull \hbox (8.3274pt too wide) in paragraph at lines 359--360
+[]\OT1/ptm/m/n/10 The fun-da-men-tal fre-quency achieves asymp-totic con-ver-ge
+nce with $\OML/ztmcm/m/it/10 GCI[] \OT1/ztmcm/m/n/10 = 0\OML/ztmcm/m/it/10 :\OT
+1/ztmcm/m/n/10 23% \OMS/ztmcm/m/n/10 ^^\
+[100]
+Underfull \hbox (badness 1365) in paragraph at lines 403--403
+[]\OT1/ptm/b/n/8.5 Table 6.3|[]\OT1/ptm/m/n/8.5 Steinberg 3-band cu-mu-la-tive 
+fa-tigue dam-age cal-cu-la-tion for Can-di-date #28 ($\OML/ztmcm/m/it/8.5 f[] \
+OT1/ztmcm/m/n/8.5 =
+[101] [102] [103] [104]
+Underfull \hbox (badness 1259) in paragraph at lines 598--598
+[]|\OT1/ptm/m/n/7 Drastic ma-te-rial con-sol-i-
+
+Underfull \hbox (badness 1960) in paragraph at lines 598--598
+[]|\OT1/ptm/m/n/7 Higher spe-cific dy-namic
+
+Underfull \hbox (badness 10000) in paragraph at lines 598--598
+[]|$\OML/ztmcm/m/it/7 MS[] \OT1/ztmcm/m/n/7 = +2\OML/ztmcm/m/it/7 :\OT1/ztmcm/m
+/n/7 04$ \OT1/ptm/m/n/7 over
+
+Underfull \hbox (badness 10000) in paragraph at lines 598--598
+[]|\OT1/ptm/m/n/7 Shields sen-si-tive op-ti-
+
+Underfull \hbox (badness 10000) in paragraph at lines 598--598
+[]|\OT1/ptm/m/n/7 Ample re-serve against
+
+Underfull \hbox (badness 10000) in paragraph at lines 598--598
+[]|\OT1/ptm/m/n/7 Subcritical non-
+
+Underfull \hbox (badness 10000) in paragraph at lines 598--598
+\OT1/ptm/m/n/7 propagation ($\OML/ztmcm/m/it/7 ^^AK[] \OT1/ztmcm/m/n/7 =
+
+Underfull \hbox (badness 10000) in paragraph at lines 598--598
+[]|$\OT1/ztmcm/m/n/7 100%$ \OT1/ptm/m/n/7 self-supporting
+[105] [106]
+Overfull \hbox (2.70659pt too wide) in paragraph at lines 617--618
+\OT1/ptm/m/n/10 multi-physics com-pu-ta-tional pipeline (in-cor-po-rat-ing high
+-order quadratic FEA, dual-
+[107] [108]
+Overfull \hbox (13.59122pt too wide) in paragraph at lines 692--693
+\OT1/ptm/m/n/10 sta-bi-lizes at $\OML/ztmcm/m/it/10 ^^[[] \OT1/ztmcm/m/n/10 = 1
+66\OML/ztmcm/m/it/10 :\OT1/ztmcm/m/n/10 91 []$\OT1/ptm/m/n/10 , guar-an-tee-ing
+ pos-i-tive Mar-gins of Safety ($\OML/ztmcm/m/it/10 MS[] \OT1/ztmcm/m/n/10 =
+[109]) [110] (./appendices/app_a_fea_decks.tex
+(/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty)
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 20--21
+[][][][] 
+
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 24--26
+[][][][] 
+
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 28--29
+[][][][] 
+
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 30--31
+[][][][] 
+[111]
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 33--34
+[][][][] 
+
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 35--36
+[][][][] 
+
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 52--53
+[][][][] 
+
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 54--55
+[][][][] 
+
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 60--61
+[][][][] 
+
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 64--65
+[][][][] 
+
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 80--81
+[][][][] 
+
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 82--83
+[][][][] 
+[112]
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 98--99
+[][][][] 
+
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 100--101
+[][][][] 
+
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 110--111
+[][][][] 
+
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 113--114
+[][][][] 
+
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 132--133
+[][][][] 
+[113]
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 135--136
+[][][][] 
+
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 145--146
+[][][][] 
+
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 147--148
+[][][][] 
+
+LaTeX Font Warning: Font shape `OT1/cmtt/bx/n' in size <12> not available
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 160.
+
+[114]
+Overfull \hbox (50.46666pt too wide) in paragraph at lines 211--212
+\OT1/ptm/m/n/10 Starter Deck (\OT1/cmtt/m/n/10 CUBESAT[]EJECTION[]0000.rad\OT1/
+ptm/m/n/10 ) and En-gine Deck (\OT1/cmtt/m/n/10 CUBESAT[]EJECTION[]0001.rad\OT1
+/ptm/m/n/10 ).
+
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 218--219
+[][] 
+
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 221--222
+[][] 
+[115]
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 263--264
+[][] 
+
+Overfull \hbox (23.08286pt too wide) in paragraph at lines 265--266
+[][] 
+[116]) [117] (./appendices/app_b_code_listings.tex [118]
+
+LaTeX Font Warning: Font shape `OT1/cmtt/bx/n' in size <7> not available
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 18.
+
+[119] [120] [121] [122] [123]) [124] (./main.bbl [125]) (./main.ind) [126]
+(./main.aux (./frontmatter/dedication.aux) (./frontmatter/preface.aux)
+(./frontmatter/acknowledgement.aux) (./frontmatter/ethics.aux)
+(./frontmatter/acronyms.aux) (./chapters/01_launch_environment.aux)
+(./chapters/02_auxetic_mechanics.aux) (./chapters/03_dfam_alsi10mg.aux)
+(./chapters/04_fea_spectral.aux) (./chapters/05_pgml_optimization.aux)
+(./chapters/06_flight_qualification.aux) (./appendices/app_a_fea_decks.aux)
+(./appendices/app_b_code_listings.aux))
+
+LaTeX Warning: There were multiply-defined labels.
+
+ )
+(see the transcript file for additional information)</usr/share/texlive/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fo
+nts/type1/public/amsfonts/cm/cmitt10.pfb></usr/share/texlive/texmf-dist/fonts/t
+ype1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
+ublic/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
+msfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/c
+mtt12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.p
+fb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pf
+b></usr/share/texlive/texmf-dist/fonts/type1/public/rsfs/rsfs10.pfb></usr/share
+/texlive/texmf-dist/fonts/type1/urw/symbol/usyr.pfb></usr/share/texlive/texmf-d
+ist/fonts/type1/urw/symbol/usyr.pfb></usr/share/texlive/texmf-dist/fonts/type1/
+urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8
+a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on main.pdf (144 pages, 2947071 bytes).
+Transcript written on main.log.

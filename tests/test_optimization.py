@@ -26,8 +26,8 @@ def test_bounds_and_individual_initialization() -> None:
     assert len(lb) == 4
     assert len(ub) == 4
     assert np.all(lb < ub)
-    assert lb[0] == 45.0  # Self-supporting overhang minimum
-    assert lb[1] == 0.60  # Minimum strut thickness
+    assert lb[0] == pytest.approx(45.0)  # Self-supporting overhang minimum
+    assert lb[1] == pytest.approx(0.60)  # Minimum strut thickness
 
     vars_sample = np.array([60.0, 1.0, 6.0, 10.0], dtype=np.float32)
     ind = CandidateIndividual(variables=vars_sample)

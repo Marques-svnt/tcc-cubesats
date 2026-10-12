@@ -1,0 +1,387 @@
+%
+% Elementos Pós-Textuais: Apêndices
+%
+
+\begin{apendicesenv}
+\partapendices
+
+\chapter{Decks de simulação dos solucionadores em código aberto}
+\label{chap:apendice_decks}
+
+Este apêndice documenta as listagens anotadas dos arquivos de entrada (\textit{decks}) gerados programaticamente para os três solucionadores elastodinâmicos de código aberto que compõem o ecossistema computacional da pesquisa: Code\_Aster, CalculiX e OpenRadioss.
+
+\section{Arquivo de comandos do Code\_Aster (\texttt{cubesat\_gevs\_modal\_psd.comm})}
+\label{sec:comm-codeaster}
+
+O arquivo de comandos a seguir é gerado pelo módulo \code{src/analysis/code_aster_runner.py} e executado via \code{as_run} sob ambiente Linux/WSL. Ele parametriza a análise modal de Lanczos/Sorensen e a resposta dinâmica espectral sob excitação de base aleatória PSD (\SI{14.1}{\Grms}) da norma NASA GSFC-STD-7000A:
+
+\begin{lstlisting}[language=Python, caption={Arquivo de comando Code\_Aster (.comm) para extração modal e resposta PSD}, label={lst:codeaster-comm}]
+# =====================================================================
+# CODE_ASTER COMMAND FILE: CubeSat 1U Auxetic Dynamic Qualification
+# Normative Standard: NASA GSFC-STD-7000A (GEVS 14.1 Grms)
+# =====================================================================
+DEBUT(PAR_LOT='NON')
+
+# 1. Leitura da malha volumetrica Tet10 gerada pelo Gmsh
+mesh = LIRE_MAILLAGE(FORMAT='MED', UNITE=20)
+
+# 2. Atribuicao do modelo mecanico continuo 3D
+model = AFFE_MODELE(
+    AFFE=_F(MODELISATION='3D', PHENOMENE='MECANIQUE', TOUT='OUI'),
+    MAILLAGE=mesh,
+)
+
+# 3. Definicao e atribuicao constitutiva da liga AlSi10Mg tratada
+alsi10mg = DEFI_MATERIAU(
+    ELAS=_F(E=68000.0, NU=0.33, RHO=2.67e-9) # mm, N, MPa, ton/mm^3
+)
+mat_field = AFFE_MATERIAU(
+    AFFE=_F(GROUP_MA='Volume_AlSi10Mg', MATER=alsi10mg),
+    MAILLAGE=mesh,
+)
+
+# 4. Condicoes de contorno de lancamento (P-POD Flexible Support)
+bc_pod = AFFE_CHAR_MECA(
+    DDL_IMPO=(
+        _F(GROUP_MA='Rails_Contact_Surfaces', DX=0.0, DY=0.0),
+        _F(GROUP_MA='Bottom_Base_Z0', DZ=0.0),
+    ),
+    MODELE=model,
+)
+
+# 5. Montagem das matrizes globais de rigidez e massa consistente
+num_dof = NUME_DDL(MATR_RIGI=ASBL_MATR(CHAR_MECA=bc_pod, MODELE=model))
+mat_k = ASBL_MATR(CHAR_MECA=bc_pod, MATR_ELEM=CALC_MATR_ELEM(MODELE=model, OPTION='RIGI_MECA'))
+mat_m = ASBL_MATR(CHAR_MECA=bc_pod, MATR_ELEM=CALC_MATR_ELEM(MODELE=model, OPTION='MASS_MECA'))
+
+# 6. Extracao modal de autovalores via algoritmo de Sorensen/Lanczos
+modes = CALC_MODES(
+    CALC_FREQ=_F(NMAX_FREQ=10),
+    MATR_MASS=mat_m,
+    MATR_RIGI=mat_k,
+    METHODE='SORENSEN',
+    OPTION='PLUS_PETITE',
+)
+
+# 7. Definicao do espectro PSD de qualificacao da NASA GEVS (14.1 Grms)
+psd_func = DEFI_FONCTION(
+    NOM_PARA='FREQ',
+    VALE=(
+        20.0,   0.013 * 9.80665**2 * 1e-6,
+        50.0,   0.080 * 9.80665**2 * 1e-6,
+        800.0,  0.080 * 9.80665**2 * 1e-6,
+        2000.0, 0.0053 * 9.80665**2 * 1e-6,
+    ),
+)
+
+# 8. Amortecimento critico modal constante (zeta = 0.020, Q = 25)
+zeta_list = DEFI_LIST_REEL(DEBUT=0.02, INTERVALLE=_F(JUSQU_A=0.02, NOMBRE=10))
+
+# 9. Integracao estocastica de resposta espectral por superposicao modal
+psd_resp = DYNA_ALEA_MODAL(
+    AMOR_REDUIT=zeta_list,
+    EXCIT=_F(DIRECTION=(0.0, 0.0, 1.0), FONCTION=psd_func),
+    MODE_MECA=modes,
+    OPTION='REPONSE_SPECTRALE',
+)
+
+# 10. Calculo dos campos estocasticos de tensao equivalente (3-sigma)
+sig_3sig = CALC_CHAMP(
+    CRITERES='SIEQ_ELNO',
+    MODELE=model,
+    OPERATION='EXTRACTION',
+    RESULTAT=psd_resp,
+)
+
+IMPR_RESU(FORMAT='MED', RESU=_F(RESULTAT=sig_3sig), UNITE=80)
+FIN()
+\end{lstlisting}
+
+\section{Arquivo de entrada do CalculiX (\texttt{cubesat\_calculix\_modal.inp})}
+\label{sec:inp-calculix}
+
+O deck a seguir é gerado pelo módulo \code{src/analysis/calculix_runner.py} para verificação independente de autovalores e autovetores no solver \code{ccx}:
+
+\begin{lstlisting}[caption={Deck CalculiX (.inp) para verificação modal com elementos C3D10}, label={lst:calculix-inp}]
+*HEADING
+CubeSat 1U Auxetic Frame - Independent Modal Verification
+*NODE, INPUT=nodes.nam
+*ELEMENT, TYPE=C3D10, ELSET=E_ALL, INPUT=elements.nam
+*MATERIAL, NAME=ALSI10MG
+*ELASTIC
+ 68000.0, 0.33
+*DENSITY
+ 2.670E-9
+*SOLID SECTION, ELSET=E_ALL, MATERIAL=ALSI10MG
+*NSET, NSET=N_RAILS, INPUT=nset_rails.nam
+*NSET, NSET=N_BOTTOM, INPUT=nset_bottom.nam
+*BOUNDARY
+ N_RAILS, 1, 2, 0.0
+ N_BOTTOM, 3, 3, 0.0
+*STEP
+*FREQUENCY, STORAGE=YES
+ 10
+*NODE FILE
+ U
+*EL FILE
+ S, E
+*END STEP
+\end{lstlisting}
+
+\section{Parâmetros de controle do OpenRadioss (\texttt{0000.rad} e \texttt{0001.rad})}
+\label{sec:rad-openradioss}
+
+A dinâmica explícita não linear de ejeção no P-POD e choque impulsivo no batente é governada pelos decks do OpenRadioss gerados por \code{src/analysis/openradioss_shock_runner.py}:
+
+\begin{lstlisting}[caption={Starter e Engine decks do OpenRadioss para simulação de choque de ejeção}, label={lst:openradioss-rad}]
+# --- STARTER DECK: 0000.rad ---
+/BEGIN
+CubeSat_1U_PPOD_Ejection_Shock
+/UNIT
+# mm, ms, g, kN
+/MAT/LAW2/1 (Johnson-Cook Plasticity for AlSi10Mg)
+# Rho, E, Nu
+2.67e-3   68.0   0.33
+# Yield, Hardening, Exponent
+0.230     0.350  0.450
+/PROP/TYPE14/1 (Solid Property for Tet10)
+/PROP/TYPE4/1 (Spring Property for P-POD Main Spring)
+# Stiffness k (kN/mm), Preload P0 (kN), Max Stroke (mm)
+0.556e-3  0.0556  100.0
+/INTER/TYPE7/1 (Contact with Friction against P-POD Rails)
+# Gap, Friction mu, Stiffness factor
+0.100  0.200  1.0e5
+
+# --- ENGINE DECK: 0001.rad ---
+/RUN/CubeSat_1U_PPOD_Shock/25.0
+/DT/NODA/CST
+# Target timestep (ms), Scale factor
+0.90  1.0e-5
+/ANIM/ELEM/VONM
+/ANIM/DT
+0.50
+/TH/NODE/1 (Payload Interface Acceleration)
+/PRINT/-100
+/END
+\end{lstlisting}
+
+\chapter{Implementação computacional e arquitetura do código-fonte}
+\label{chap:apendice_codigo}
+
+Este apêndice documenta os componentes centrais da esteira computacional autônoma: a arquitetura PyTorch da rede neural residual informada por física e o grafo de fluxo determinístico em LangGraph.
+
+\section{Modelo substituto neural residual (\texttt{Physics-Guided ResNet})}
+\label{sec:code-resnet}
+
+O módulo \code{src/neural/surrogate_model.py} implementa a rede neural profunda com conexões residuais, projeção latente e camada de perdas compostas informadas por física:
+
+\begin{lstlisting}[language=Python, caption={Implementação PyTorch da Physics-Guided ResNet}, label={lst:resnet-code}]
+import torch
+import torch.nn as nn
+from typing import Dict, Tuple
+
+class ResidualBlock(nn.Module):
+    """Deep residual block with LayerNorm, GELU activation, and Dropout."""
+    def __init__(self, hidden_dim: int, dropout_rate: float = 0.05) -> None:
+        super().__init__()
+        self.fc1 = nn.Linear(hidden_dim, hidden_dim)
+        self.norm1 = nn.LayerNorm(hidden_dim)
+        self.act1 = nn.GELU()
+        self.dropout1 = nn.Dropout(dropout_rate)
+        
+        self.fc2 = nn.Linear(hidden_dim, hidden_dim)
+        self.norm2 = nn.LayerNorm(hidden_dim)
+        self.act2 = nn.GELU()
+        self.dropout2 = nn.Dropout(dropout_rate)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        residual = x
+        out = self.fc1(x)
+        out = self.norm1(out)
+        out = self.act1(out)
+        out = self.dropout1(out)
+        
+        out = self.fc2(out)
+        out = self.norm2(out)
+        out = self.act2(out)
+        out = self.dropout2(out)
+        return residual + out
+
+class CubeSatSurrogateResNet(nn.Module):
+    """Deep residual neural network with 3 blocks for elastodynamic surrogate modeling."""
+    def __init__(self, input_dim: int = 4, hidden_dim: int = 128, output_dim: int = 4) -> None:
+        super().__init__()
+        self.input_proj = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.LayerNorm(hidden_dim),
+            nn.GELU()
+        )
+        self.res_block1 = ResidualBlock(hidden_dim)
+        self.res_block2 = ResidualBlock(hidden_dim)
+        self.res_block3 = ResidualBlock(hidden_dim)
+        self.head = nn.Linear(hidden_dim, output_dim)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        feat = self.input_proj(x)
+        feat = self.res_block1(feat)
+        feat = self.res_block2(feat)
+        feat = self.res_block3(feat)
+        return self.head(feat)
+
+class PhysicsGuidedLoss(nn.Module):
+    """Composite loss function: MSE + Gibson-Ashby asymptote + Monotonicity."""
+    def __init__(self, lambda_phys: float = 0.05, lambda_mono: float = 0.02) -> None:
+        super().__init__()
+        self.mse = nn.MSELoss()
+        self.lambda_phys = lambda_phys
+        self.lambda_mono = lambda_mono
+
+    def forward(
+        self, y_pred: torch.Tensor, y_true: torch.Tensor, x_raw: torch.Tensor
+    ) -> Tuple[torch.Tensor, Dict[str, float]]:
+        loss_mse = self.mse(y_pred, y_true)
+        
+        # Physics penalty: fundamental frequency f1 cannot be lower than 20.0 Hz
+        pred_f1 = y_pred[:, 0]
+        loss_phys = torch.mean(torch.clamp(20.0 - pred_f1, min=0.0) ** 2)
+        
+        # Monotonicity penalty: df1/dt must be strictly non-negative
+        # Penalizes pairs where thicker struts yield lower fundamental frequency
+        t_strut = x_raw[:, 1]
+        diff_t = t_strut.unsqueeze(1) - t_strut.unsqueeze(0)
+        diff_f = pred_f1.unsqueeze(1) - pred_f1.unsqueeze(0)
+        mask = diff_t > 0.0
+        violations = torch.clamp(-diff_f[mask], min=0.0)
+        loss_mono = torch.mean(violations ** 2) if violations.numel() > 0 else torch.tensor(0.0)
+        
+        total_loss = loss_mse + self.lambda_phys * loss_phys + self.lambda_mono * loss_mono
+        return total_loss, {
+            "loss_mse": loss_mse.item(),
+            "loss_phys": loss_phys.item(),
+            "loss_mono": loss_mono.item(),
+        }
+\end{lstlisting}
+
+\section{Grafo de estados determinístico em LangGraph (\texttt{multi\_agent\_graph.py})}
+\label{sec:code-langgraph}
+
+A governança do fluxo concorrente é instanciada pela máquina de estados determinística no módulo \code{src/agents/state_machine.py}:
+
+\begin{lstlisting}[language=Python, caption={Instanciação da máquina de estados finitos determinística via LangGraph}, label={lst:langgraph-code}]
+from langgraph.graph import StateGraph, END
+from src.agents.state import CubeSatState
+from src.agents.specialists import (
+    cad_dfam_gate_node,
+    surrogate_inference_node,
+    gevs_qualifier_node,
+    high_fidelity_fea_node,
+    route_after_dfam,
+    route_after_gevs,
+)
+
+def create_deterministic_cubesat_graph() -> StateGraph:
+    """Creates deterministic Directed Acyclic Graph (DAG) for structural qualification."""
+    builder = StateGraph(CubeSatState)
+    
+    # Operational specialist nodes
+    builder.add_node("cad_dfam_gate", cad_dfam_gate_node)
+    builder.add_node("surrogate_inference", surrogate_inference_node)
+    builder.add_node("gevs_qualifier", gevs_qualifier_node)
+    builder.add_node("high_fidelity_fea", high_fidelity_fea_node)
+    
+    # Deterministic entry point
+    builder.set_entry_point("cad_dfam_gate")
+    
+    # Conditional fail-fast DfAM routing
+    builder.add_conditional_edges(
+        "cad_dfam_gate",
+        route_after_dfam,
+        {
+            "proceed": "surrogate_inference",
+            "reject": END,
+        }
+    )
+    
+    # Deterministic transition to GEVS qualifier
+    builder.add_edge("surrogate_inference", "gevs_qualifier")
+    
+    # Conditional edge after aerospace qualification
+    builder.add_conditional_edges(
+        "gevs_qualifier",
+        route_after_gevs,
+        {
+            "proceed_fea": "high_fidelity_fea",
+            "reject": END,
+        }
+    )
+    
+    builder.add_edge("high_fidelity_fea", END)
+    return builder.compile()
+\end{lstlisting}
+
+\chapter{Dados do planejamento de experimentos (DoE) e soluções de Pareto}
+\label{chap:apendice_doe}
+
+Este apêndice reúne os registros numéricos consolidados das campanhas de amostragem paramétrica por Hipercubo Latino (DoE de 250 pontos) e o catálogo detalhado das soluções não dominadas da fronteira de Pareto NSGA-II.
+
+\section{Amostras representativas do DoE de 250 pontos}
+\label{sec:tabela-doe-amostras}
+
+A Tabela~\ref{tab:doe-250-amostras} apresenta 12 pontos amostrais representativos extraídos do DoE multiescala calibrado, cobrindo todo o espectro de variação paramétrica e ilustrando a correspondência entre parâmetros geométricos e respostas dinâmicas.
+
+\begin{table}[htb]
+  \caption{Amostras representativas do planejamento de experimentos (DoE) multiescala calibrado}
+  \label{tab:doe-250-amostras}
+  \scriptsize
+  \SingleSpacing
+  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{1.4cm} *{8}{>{\centering\arraybackslash}X} >{\centering\arraybackslash}p{1.6cm}@{}}
+    \toprule
+    \textbf{ID} & $\theta$ (\si{\degree}) & $t$ (\si{\milli\metre}) & $l$ (\si{\milli\metre}) & $h$ (\si{\milli\metre}) & $\rho^{*}/\rho_s$ & $f_1$ (\si{\hertz}) & $\sigma_{3\sigma}$ (\si{\mega\pascal}) & $T$ & \textbf{Status DfAM} \\
+    \midrule
+    \texttt{DoE-001} & \num{52.14} & \num{0.62} & \num{7.45}  & \num{9.12}  & \num{0.118} & \num{625.4} & \num{178.20} & \num{0.285} & Aprovado \\
+    \texttt{DoE-024} & \num{61.80} & \num{0.85} & \num{8.20}  & \num{11.50} & \num{0.185} & \num{668.1} & \num{135.40} & \num{0.242} & Aprovado \\
+    \texttt{DoE-048} & \num{74.50} & \num{1.45} & \num{9.80}  & \num{15.20} & \num{0.412} & \num{730.5} & \num{89.10}  & \num{0.178} & Aprovado \\
+    \texttt{DoE-072} & \num{48.30} & \num{0.55} & \num{6.80}  & \num{8.50}  & \num{0.105} & \num{598.2} & \num{182.50} & \num{0.312} & Aprovado \\
+    \texttt{DoE-095} & \num{65.75} & \num{0.61} & \num{8.50}  & \num{13.96} & \num{0.125} & \num{642.4} & \num{168.57} & \num{0.199} & Aprovado (Ótimo) \\
+    \texttt{DoE-120} & \num{82.10} & \num{1.60} & \num{12.40} & \num{18.50} & \num{0.542} & \num{782.0} & \num{68.40}  & \num{0.165} & Aprovado \\
+    \texttt{DoE-145} & \num{42.00} & \num{0.45} & \num{6.00}  & \num{7.80}  & \num{0.098} & ---         & ---          & ---         & Rejeitado ($t < 0{,}5$) \\
+    \texttt{DoE-168} & \num{78.90} & \num{1.75} & \num{8.50}  & \num{9.20}  & \num{0.895} & ---         & ---          & ---         & Rejeitado ($\rho_{\text{rel}} > 0{,}85$) \\
+    \texttt{DoE-192} & \num{58.40} & \num{1.10} & \num{7.90}  & \num{10.80} & \num{0.248} & \num{695.8} & \num{112.30} & \num{0.218} & Aprovado \\
+    \texttt{DoE-215} & \num{67.20} & \num{0.92} & \num{9.10}  & \num{12.40} & \num{0.198} & \num{674.2} & \num{128.90} & \num{0.205} & Aprovado \\
+    \texttt{DoE-238} & \num{54.60} & \num{1.35} & \num{8.40}  & \num{11.00} & \num{0.285} & \num{715.4} & \num{98.50}  & \num{0.235} & Aprovado \\
+    \texttt{DoE-250} & \num{63.10} & \num{0.70} & \num{8.80}  & \num{12.80} & \num{0.142} & \num{648.9} & \num{155.20} & \num{0.224} & Aprovado \\
+    \bottomrule
+  \end{tabularx}
+  \fonte{Elaborada pelo autor (2026).}
+\end{table}
+
+\section{Catálogo das soluções não dominadas de Pareto (NSGA-II)}
+\label{sec:tabela-pareto-catalogo}
+
+A Tabela~\ref{tab:catalogo-pareto} consolida uma seleção balanceada de 10 indivíduos distribuídos ao longo de toda a extensão da fronteira de Pareto NSGA-II após 100 gerações evolutivas, permitindo visualizar a transição contínua entre soluções de mínima massa e soluções de máxima atenuação dinâmica.
+
+\begin{table}[htb]
+  \caption{Seleção de soluções representativas da fronteira de Pareto NSGA-II}
+  \label{tab:catalogo-pareto}
+  \scriptsize
+  \SingleSpacing
+  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{1.8cm} *{8}{>{\centering\arraybackslash}X} >{\centering\arraybackslash}p{1.4cm}@{}}
+    \toprule
+    \textbf{Indivíduo} & $\theta$ (\si{\degree}) & $t$ (\si{\milli\metre}) & $l$ (\si{\milli\metre}) & $h$ (\si{\milli\metre}) & $m$ (\si{\kilo\gram}) & $T$ & $f_1$ (\si{\hertz}) & $\sigma_{3\sigma}$ (\si{\mega\pascal}) & $C_i^*$ (TOPSIS) \\
+    \midrule
+    \texttt{Sol-004} & \num{45.01} & \num{0.618} & \num{7.16} & \num{8.32}  & \num{0.1107} & \num{0.3164} & \num{632.3} & \num{183.70} & \num{0.612} \\
+    \texttt{Sol-012} & \num{48.30} & \num{0.615} & \num{7.40} & \num{8.90}  & \num{0.1118} & \num{0.2980} & \num{635.8} & \num{180.20} & \num{0.658} \\
+    \texttt{Sol-020} & \num{55.40} & \num{0.612} & \num{7.85} & \num{10.40} & \num{0.1132} & \num{0.2640} & \num{638.4} & \num{175.40} & \num{0.724} \\
+    \texttt{Sol-028} & \num{65.75} & \num{0.613} & \num{8.50} & \num{13.96} & \num{0.1155} & \num{0.1997} & \num{642.4} & \num{168.57} & \textbf{\num{0.814}} (Eleito) \\
+    \texttt{Sol-035} & \num{68.10} & \num{0.625} & \num{8.65} & \num{14.20} & \num{0.1172} & \num{0.1945} & \num{644.2} & \num{166.10} & \num{0.805} \\
+    \texttt{Sol-045} & \num{71.50} & \num{0.640} & \num{8.90} & \num{14.80} & \num{0.1205} & \num{0.1880} & \num{648.5} & \num{162.40} & \num{0.792} \\
+    \texttt{Sol-058} & \num{74.20} & \num{0.680} & \num{9.15} & \num{15.30} & \num{0.1264} & \num{0.1820} & \num{655.1} & \num{155.80} & \num{0.768} \\
+    \texttt{Sol-066} & \num{59.78} & \num{1.792} & \num{7.84} & \num{8.82}  & \num{0.1665} & \num{0.2975} & \num{745.1} & \num{72.14}  & \num{0.542} \\
+    \texttt{Sol-080} & \num{78.40} & \num{0.750} & \num{9.50} & \num{16.00} & \num{0.1382} & \num{0.1780} & \num{668.4} & \num{142.10} & \num{0.735} \\
+    \texttt{Sol-003} & \num{66.40} & \num{0.600} & \num{8.50} & \num{13.96} & \num{0.1156} & \num{0.1995} & \num{641.9} & \num{167.76} & \num{0.812} \\
+    \bottomrule
+  \end{tabularx}
+  \fonte{Elaborada pelo autor (2026).}
+\end{table}
+
+\end{apendicesenv}

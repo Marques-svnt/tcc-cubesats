@@ -1,0 +1,25 @@
+$pyNastran: version=msc
+$pyNastran: punch=True
+$pyNastran: encoding=utf-8
+$pyNastran: nnodes=10
+$pyNastran: nelements=1
+$NODES
+GRID           1              0.      0.      0.
+GRID           2             10.      0.      0.
+GRID           3              0.     10.      0.
+GRID           4              0.      0.     10.
+GRID           5              5.      0.      0.
+GRID           6              5.      5.      0.
+GRID           7              0.      5.      0.
+GRID           8              0.      0.      5.
+GRID           9              5.      0.      5.
+GRID          10              0.      5.      5.
+$ELEMENTS
+CTETRA         1       1       1       2       3       4       5       6
+               7       8       9      10
+$PROPERTIES
+PSOLID         1       1
+$MATERIALS
+MAT1           1  68000.             .33  2.68-9
+$SPCs
+SPC1           1  123456       1

@@ -53,9 +53,21 @@ def calculate_relative_density(
     sin_theta = math.sin(theta_rad)
     ratio_h_l = height_h / length_l
 
-    # Relative density analytical formulation
+    # Relative density analytical formulation for re-entrant auxetic cells
+    # (Gibson & Ashby 1997 / Masters & Evans 1996)
+    # Effective vertical unit cell height is 2*(h - l*sin(theta))
+    reentrant_factor = ratio_h_l - sin_theta
+    if reentrant_factor <= 1e-4:
+        logger.warning(
+            "Re-entrant cell geometry self-intersection: h/l=%.3f <= sin(theta)=%.3f. "
+            "Applying boundary regularization for DfAM screening.",
+            ratio_h_l,
+            sin_theta,
+        )
+    effective_factor = max(reentrant_factor, 0.05)
+
     numerator = (thickness_t / length_l) * (ratio_h_l + 2.0)
-    denominator = 2.0 * cos_theta * (ratio_h_l + sin_theta)
+    denominator = 2.0 * cos_theta * effective_factor
 
     rel_density = numerator / denominator
     logger.debug(

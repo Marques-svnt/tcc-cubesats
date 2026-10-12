@@ -1,0 +1,17 @@
+\preface
+
+Small satellites, particularly the standardized CubeSat platform, have revolutionized access to space over the past two decades. What began as an educational initiative has evolved into an indispensable capability for low Earth orbit (LEO) constellations, optical Earth observation, scientific telecommunications, and deep-space technology demonstration missions. However, miniaturization imposes severe structural challenges: sensitive optical payloads and electronic instruments must endure violent dynamic launch environments characterized by broad-band acoustic excitation and random vibrations reaching root-mean-square accelerations well above \SI{14.0}{\text{G}_{\text{rms}}}.
+
+Conventional small satellite chassis rely on monolithic aluminum alloys machined via traditional subtractive processes. While reliable, these structures exhibit minimal material damping ($\zeta \approx 1\text{--}2\%$), directly transmitting severe high-frequency vibrational loads from the deployer canister to the delicate internal payload. Furthermore, mass penalties in monolithic frames restrict available mass allocations for scientific instrumentation, thermal control, and propulsion.
+
+This monograph presents a rigorous, end-to-end engineering pipeline for the structural optimization and flight qualification of a 1U CubeSat chassis fabricated via Laser Powder Bed Fusion (L-PBF) in aerospace-grade AlSi10Mg aluminum alloy, incorporating functionally graded re-entrant auxetic metamaterials ($\nu_{\text{eff}} < 0$). By leveraging the localized phononic bandgaps and elastic strain-energy dissipation mechanisms of re-entrant cellular cores, passive elastodynamic shielding is achieved without adding parasitic mass or active isolation components.
+
+Developed at the State University of Santa Cruz (UESC, Brazil), this work integrates parametric B-Rep geometric modeling, open-source high-order finite element analysis (Code\_Aster, CalculiX, and Gmsh), and physics-guided deep learning surrogates. By regularizing residual neural networks with Gibson-Ashby micromechanical scaling laws, evolutionary multiobjective optimization (NSGA-II) is accelerated by five orders of magnitude. The culminating flight-candidate design achieves a \SI{62.5}{\percent} reduction in chassis structural mass while delivering a \SI{-12.6}{\decibel} attenuation in payload acceleration under full-envelope NASA General Environmental Verification Standard (GEVS) qualification.
+
+This volume is intended for aerospace structural engineers, launch vehicle dynamicists, additive manufacturing researchers, and computational mechanics specialists seeking an open-source, mathematically rigorous methodology for lightweight, vibration-isolated space architectures.
+
+\vspace{\baselineskip}
+\begin{flushright}
+\textit{Ilhéus, Bahia, Brazil} \hfill \textbf{Gabriel Marques de Andrade}\\
+\textit{October 2026} \hfill \\
+\end{flushright}

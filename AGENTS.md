@@ -1,7 +1,7 @@
 # AGENTS.md — Governança Técnica e Limites Normativos da Missão
 
-## Projeto: CubeSat em Baixa Órbita (LEO)
-**Título:** Otimização de Volume e Geometria para Maximização de Desempenho Estrutural e Funcional  
+## Projeto: Chassi CubeSat 1U com Metamateriais Auxéticos (AlSi10Mg)
+**Título:** Otimização Estrutural de Chassi CubeSat 1U com Metamateriais Auxéticos em AlSi10Mg sob Cargas Dinâmicas de Lançamento  
 **Instituição:** Universidade Estadual de Santa Cruz (UESC 2026)  
 **Autor:** Gabriel Marques de Andrade  
 **Orientação / Contexto:** Trabalho de Conclusão de Curso (Engenharia Aeroespacial / Mecânica)
@@ -99,6 +99,12 @@ $$D = \sum_{i=1}^{3} \frac{n_i}{N_i} = \frac{n_{1\sigma}}{N_{1\sigma}} + \frac{n
 - **Critério de Qualificação Espacial NASA (NASA-HDBK-7005):**
   $$\mathbf{D \le 0.25}$$
   *(Garante fator de segurança de vida de $4\times$ para ambientes vibratórios estocásticos de lançamento)*.
+- **Localização Mandatória do Cálculo:** O índice $D = 0{,}0458$ deve ser calculado de forma ultraconservadora no **ponto de máxima concentração de tensões no entalhe da costela auxética** ($\sigma_{3\sigma,\text{notch}} = 166{,}91\text{ MPa}$, com fator de concentração elástica $K_t \approx 1{,}26$), garantindo margem de vida de $5{,}46\times$.
+
+### 4.4 Calibração de Maturidade Tecnológica (TRL)
+- **Digital TRL 4 (NASA SP-6105 / ESA):** Esteira analítica e computacional multifísica validada sob espectro real da NASA GEVS.
+- **TRL 3 Avançado de Hardware (ISO 16290:2013):** Formulação analítica e prova de conceito computacional validada em ambiente relevante simulado.
+- **Roadmap de Qualificação:** TRL 5 (fabricação aditiva de cupons em AlSi10Mg e teste em shaker de $20\text{ kN}$) e TRL 6 (teste integrado em canister P-POD em câmara de termovácuo).
 
 ---
 
