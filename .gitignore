@@ -107,3 +107,12 @@ logs/*.log
 *.run.xml
 *.bcf
 *.loa
+
+# --- Local Academic Manuscripts & Compiled PDFs (tracked in feat/scientific-writings-and-monographs) ---
+monografia_tcc_final.pdf
+monografia_tcc_v8.pdf
+Entregas-finais/
+monografia/
+reports/apresentacao_banca_tcc.pdf
+reports/apresentacao_banca_tcc.pptx
+reports/apresentacao_banca_tcc.tex
